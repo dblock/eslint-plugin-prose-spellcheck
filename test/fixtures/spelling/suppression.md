@@ -1,10 +1,10 @@
-<!-- eslint-disable-next-line prose-spellcheck/spellchecker -- Intentional example -->
+<!-- eslint-disable-next-line prose-spellcheck/spellcheck -- Intentional example -->
 helo
 
-<!-- eslint-disable prose-spellcheck/spellchecker -->
+<!-- eslint-disable prose-spellcheck/spellcheck -->
 wrng
-<!-- eslint-enable prose-spellcheck/spellchecker -->
+<!-- eslint-enable prose-spellcheck/spellcheck -->
 
 helo
 
-mispellt <!-- eslint-disable-line prose-spellcheck/spellchecker -->
+mispellt <!-- eslint-disable-line prose-spellcheck/spellcheck -->

@@ -45,7 +45,7 @@ export async function prepareFixture(fixture, directory) {
 export function fixtureOptions(fixture, directory) {
   const options = Object.hasOwn(fixture, "options") ? fixture.options : {};
   if (!options || typeof options !== "object" || Array.isArray(options)) return options;
-  const prepared = { baseDir: directory, ...options };
+  const prepared = { ...(!fixture.useCwd ? { baseDir: directory } : {}), ...options };
   if (Array.isArray(prepared.dictionaries)) {
     prepared.dictionaries = prepared.dictionaries.map((entry) =>
       entry === "$VOCABULARY_URL" ? pathToFileURL(join(directory, "accepted.txt")).href : entry,
@@ -68,7 +68,7 @@ export function fixtureDiagnostics(text, reports = [], namespace = "prose-spellc
     const [line, column] = location(start);
     const [endLine, endColumn] = location(start + report.source.length);
     if (report.location) assert.deepEqual([line, column, endLine, endColumn], report.location);
-    return { ruleId: `${namespace}/spellchecker`, messageId: "unknownWord", word: report.word,
+    return { ruleId: `${namespace}/spellcheck`, messageId: "unknownWord", word: report.word,
       line, column, endLine, endColumn };
   });
 }

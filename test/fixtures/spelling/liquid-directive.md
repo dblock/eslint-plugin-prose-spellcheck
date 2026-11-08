@@ -1,3 +1,3 @@
-{{ <!-- eslint-disable prose-spellcheck/spellchecker --> }}
+{{ <!-- eslint-disable prose-spellcheck/spellcheck --> }}
 
 helo
