@@ -1,0 +1,4 @@
+jobs:
+  machine-job-id:
+    steps:
+      - run: echo ok

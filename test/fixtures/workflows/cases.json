@@ -1,0 +1,32 @@
+[
+  {
+    "name": "Title case, acronyms, expressions, and machine identifiers",
+    "file": "valid/workflow.yml",
+    "diagnostics": []
+  },
+  {
+    "name": "Missing display names are optional",
+    "file": "valid/unnamed.yml",
+    "diagnostics": []
+  },
+  {
+    "name": "Non-YAML files are not workflow inputs",
+    "file": "valid/notes.txt",
+    "diagnostics": []
+  },
+  {
+    "name": "Workflow, job, and step display-name errors",
+    "file": "invalid/workflow.yaml",
+    "diagnostics": [
+      { "path": "name", "message": "Use title case for \"test and lint\"." },
+      { "path": "jobs.test.name", "message": "Display names must be nonempty strings." },
+      { "path": "jobs.test.steps[0].name", "message": "Use title case for \"run tests\"." },
+      { "path": "jobs.test.steps[1].name", "message": "Display names must be nonempty strings." }
+    ]
+  },
+  {
+    "name": "Malformed YAML is an error",
+    "file": "malformed/workflow.yml",
+    "parseError": true
+  }
+]
