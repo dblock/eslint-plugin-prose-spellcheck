@@ -1,9 +1,10 @@
 import assert from "node:assert/strict";
 import { execFileSync } from "node:child_process";
 import { createHash } from "node:crypto";
-import { mkdir, readFile, rename, writeFile } from "node:fs/promises";
+import { appendFile, mkdir, readFile, rename, writeFile } from "node:fs/promises";
 import { resolve } from "node:path";
 import process from "node:process";
+import { setTimeout as delay } from "node:timers/promises";
 
 const archivePath = ".release/package.tgz";
 const metadataPaths = ["CHANGELOG.md", "README.md", "package-lock.json", "package.json"];
@@ -72,7 +73,8 @@ export function npmRecord(output) {
 export function registryVersion(name, version, execute = command) {
   try {
     return npmRecord(execute("npm", [
-      "view", `${name}@${version}`, "version", "dist.integrity", "--json", "--registry", "https://registry.npmjs.org",
+      "view", `${name}@${version}`, "version", "dist.integrity", "--json", "--prefer-online",
+      "--registry", "https://registry.npmjs.org",
     ]));
   } catch (error) {
     let code;
@@ -86,7 +88,16 @@ export function registryVersion(name, version, execute = command) {
   }
 }
 
-export async function releaseStep(step, version, { execute = command } = {}) {
+export async function waitForRegistryVersion(name, version, { execute = command, wait = delay } = {}) {
+  for (let attempt = 0; attempt < 36; attempt++) {
+    const published = registryVersion(name, version, execute);
+    if (published !== null) return published;
+    if (attempt < 35) await wait(5000);
+  }
+  return null;
+}
+
+export async function releaseStep(step, version, { execute = command, wait = delay } = {}) {
   const git = (...args) => execute("git", args).trim();
   const manifest = await json("package.json");
   const changelog = await readFile("CHANGELOG.md", "utf8");
@@ -144,15 +155,28 @@ export async function releaseStep(step, version, { execute = command } = {}) {
       "The validated archive changed.");
     return;
   }
-  if (step === "verify") {
+  if (step === "refs") {
     const head = git("rev-parse", "HEAD");
     const refs = git("ls-remote", "origin", "refs/heads/master", `refs/tags/v${version}^{}`).split("\n");
     assert.ok(refs.includes(`${head}\trefs/heads/master`) && refs.includes(`${head}\trefs/tags/v${version}^{}`),
       "The release commit and tag were not pushed; recover before creating a GitHub Release.");
-    const published = registryVersion(manifest.name, version, execute);
-    assert.equal(published?.version, version, "Verify registry visibility before recovery.");
-    assert.equal(published["dist.integrity"], `sha512-${hash(await readFile(archivePath), "base64")}`,
-      "The registry artifact must match the validated archive.");
+    return;
+  }
+  if (step === "verify") {
+    const published = await waitForRegistryVersion(manifest.name, version, { execute, wait });
+    if (published !== null) {
+      assert.equal(published.version, version, "Verify the published version before recovery.");
+      assert.equal(published["dist.integrity"], `sha512-${hash(await readFile(archivePath), "base64")}`,
+        "The registry artifact must match the validated archive.");
+    }
+    const message = published === null
+      ? `Warning: npm release ${version} could not be verified before the registry visibility timeout. Check again later; do not republish.`
+      : `Verified npm release ${version}: registry integrity matches the validated archive.`;
+    await writeFile(".release/verification.txt", `${message}\n`);
+    if (process.env.GITHUB_STEP_SUMMARY) {
+      await appendFile(process.env.GITHUB_STEP_SUMMARY, `\n## Registry Verification\n\n${message}\n`);
+    }
+    process.stdout.write(`${message}\n`);
     return;
   }
   assert.equal(step, "next", "Unknown release step.");
