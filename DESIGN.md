@@ -2,7 +2,7 @@
 
 ## Status and Purpose
 
-The unreleased implementation provides a standard ESLint plugin and a vocabulary collection executable. No publication, merge, or release tag is authorized by these instructions.
+The implementation provides a standard ESLint plugin and a vocabulary collection executable. No publication, merge, or release tag is authorized by these instructions.
 
 Provide one native ESLint Markdown rule, `prose-spellcheck/spellcheck`, and a read-only vocabulary collection command. Use ESLint's file selection, configuration, severity, ignore rules, suppression comments, and diagnostic formats rather than introducing another documentation linter.
 
@@ -24,7 +24,7 @@ Validate options and snapshot vocabulary during each rule creation. Resolve only
 
 Cache successfully constructed package dictionaries by resolved metadata path; failed loads never enter this cache and can be retried after repair. This path does not use CSpell's asynchronous file-loader cache. Installed package dictionary data is immutable for the process lifetime. Keep vocabulary local to each rule instance, snapshot it before scanning, and reread it when ESLint creates the rule for a later scan. Initial disk reads, decompression, and dictionary construction block rule creation; this is the deliberate tradeoff for standard declarative configuration without user-written asynchronous setup. Subsequent rules reuse cached package dictionaries. No network access, background refresh, environment-dependent dictionaries, or silent fallback is allowed during spelling.
 
-Migration from the unreleased prototype: replace the named/default `createPlugin` function import with the default plugin object, register it directly, rename the rule from `spellchecker` to `spellcheck`, and move dictionary options into `["error", { ...options }]` on the spelling rule. Move any inline vocabulary into a reviewed `.txt` file and include it in `dictionaries`. The package remains at its initial unreleased version 0.1.0.
+Migration from the unreleased prototype: replace the named/default `createPlugin` function import with the default plugin object, register it directly, rename the rule from `spellchecker` to `spellcheck`, and move dictionary options into `["error", { ...options }]` on the spelling rule. Move any inline vocabulary into a reviewed `.txt` file and include it in `dictionaries`. The initial package version is 0.1.0.
 
 ## Prose Selection and Locations
 
