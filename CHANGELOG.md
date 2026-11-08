@@ -4,6 +4,7 @@
 
 - [#6](https://github.com/dblock/eslint-plugin-prose-spellcheck/pull/6): Replace the local documentation paragraph check with eslint-plugin-markdown-preferences-paragraph 0.1.0 and simplify design documentation - [@dblock](https://github.com/dblock).
 - [#7](https://github.com/dblock/eslint-plugin-prose-spellcheck/pull/7): Support ESLint 9 and 10 with explicit compatibility matrices and version-matched packed consumers - [@dblock](https://github.com/dblock).
+- [#8](https://github.com/dblock/eslint-plugin-prose-spellcheck/pull/8): Add manually dispatched trusted publishing with exact-archive validation and release recovery instructions - [@dblock](https://github.com/dblock).
 - Your contribution here.
 
 ## 0.1.0 (2026/11/08)

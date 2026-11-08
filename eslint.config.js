@@ -6,7 +6,7 @@ import yml from "eslint-plugin-yml";
 import proseSpellcheck from "./src/index.js";
 
 export default [
-  { ignores: ["coverage/**", "test/fixtures/**", ".spelling-fixture-*/**"] },
+  { ignores: ["coverage/**", ".release/**", "test/fixtures/**", ".spelling-fixture-*/**"] },
   { ...js.configs.recommended, files: ["**/*.js"] },
   ...yml.configs["flat/recommended"],
   {
