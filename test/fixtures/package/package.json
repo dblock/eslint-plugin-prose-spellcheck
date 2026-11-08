@@ -5,7 +5,6 @@
   "dependencies": {
     "@cspell/dict-es-es": "3.0.9",
     "@cspell/dict-software-terms": "5.4.9",
-    "@eslint/markdown": "8.0.3",
-    "eslint": "10.14.0"
+    "@eslint/markdown": "8.0.3"
   }
 }
