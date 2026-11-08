@@ -1,3 +1,0 @@
-# project documentation
-
-A paragraph.
