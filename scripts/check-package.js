@@ -5,6 +5,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import process from "node:process";
 import { fileURLToPath, URL } from "node:url";
+import { collectionCases, fixtureDiagnostics, prepareCollection, prepareFixture, spellingCases, spellingDiagnostics } from "./spelling-fixtures.js";
 
 const root = fileURLToPath(new URL("../", import.meta.url));
 const fixtures = new URL("../test/fixtures/package/", import.meta.url);
@@ -23,12 +24,6 @@ function runNpm(args, cwd) {
   return result.stdout;
 }
 
-function diagnostics(results) {
-  return results.flatMap((result) =>
-    result.messages.map(({ ruleId, line, column }) => ({ ruleId, line, column })),
-  );
-}
-
 try {
   const packResult = JSON.parse(runNpm([
     "pack", "--json", "--pack-destination", temporary,
@@ -40,9 +35,7 @@ try {
   const expectedEntries = JSON.parse(await readFile(new URL("archive.json", fixtures), "utf8"));
   assert.deepEqual(entries, expectedEntries);
 
-  for (const file of [
-    "package.json", "eslint.config.js.txt", "api.mjs.txt", "valid.md", "invalid.md",
-  ]) {
+  for (const file of ["package.json", "eslint.config.js.txt", "api.mjs.txt"]) {
     await copyFile(new URL(file, fixtures), join(temporary, file.replace(/\.txt$/u, "")));
   }
   runNpm([
@@ -50,20 +43,51 @@ try {
     "--engine-strict", "--strict-peer-deps", "--save-exact", archive,
   ], temporary);
 
-  const cases = JSON.parse(await readFile(new URL("cases.json", fixtures), "utf8"));
-  for (const fixture of cases) {
-    const api = runNode(["api.mjs", fixture.file]);
-    assert.equal(api.status, 0, api.stderr);
-    assert.deepEqual(diagnostics(JSON.parse(api.stdout)), fixture.diagnostics);
-
+  for (const fixture of spellingCases) {
+    const text = await prepareFixture(fixture, temporary);
+    const api = runNode(["api.mjs", "input.md"]);
     const cli = runNode([
       join(temporary, "node_modules/eslint/bin/eslint.js"),
-      "--format", "json", fixture.file,
+      "--fix", "--format", "json", "input.md",
     ]);
-    assert.equal(cli.status, fixture.diagnostics.length ? 1 : 0, cli.stderr);
-    assert.deepEqual(diagnostics(JSON.parse(cli.stdout)), fixture.diagnostics);
+    if (fixture.error) {
+      assert.notEqual(api.status, 0);
+      assert.notEqual(cli.status, 0);
+      assert.match(api.stderr, new RegExp(fixture.error, "u"));
+      assert.match(cli.stderr, new RegExp(fixture.error, "u"));
+    } else {
+      const expected = fixtureDiagnostics(text, fixture.reports, fixture.namespace);
+      assert.equal(api.status, 0, api.stderr);
+      assert.equal(cli.status, expected.length ? 1 : 0, cli.stderr);
+      for (const result of [api, cli]) {
+        const messages = JSON.parse(result.stdout).flatMap((entry) => entry.messages);
+        assert.deepEqual(spellingDiagnostics(messages), expected, fixture.name);
+      }
+    }
+    assert.equal(await readFile(join(temporary, "input.md"), "utf8"), text);
   }
-  process.stdout.write(`Validated ${packed.filename}: ${entries.length} archive entries and ${cases.length} API/CLI fixtures.\n`);
+  const configText = await readFile(new URL("eslint.config.js.txt", fixtures), "utf8");
+  for (const fixture of collectionCases) {
+    await prepareCollection(fixture, temporary, configText);
+    const before = await readFile(join(temporary, "input.md"), "utf8");
+    const result = runNode([
+      process.env.npm_execpath, "exec", "--no", "--", "eslint-prose-spellcheck", ...fixture.args,
+    ]);
+    assert.equal(result.status, fixture.error ? 1 : 0, result.stderr);
+    assert.equal(result.stdout, fixture.stdout ?? "");
+    if (fixture.error) assert.match(result.stderr, new RegExp(fixture.error, "iu"));
+    assert.equal(await readFile(join(temporary, "input.md"), "utf8"), before);
+    for (const [file, text] of Object.entries(fixture.files ?? {})) {
+      assert.equal(await readFile(join(temporary, file), "utf8"), text);
+    }
+    if (fixture.output) {
+      assert.equal(await readFile(join(temporary, fixture.output.file), "utf8"), fixture.output.text);
+    }
+    if (fixture.absent) {
+      await assert.rejects(readFile(join(temporary, fixture.absent)), { code: "ENOENT" });
+    }
+  }
+  process.stdout.write(`Validated ${packed.filename}: ${entries.length} archive entries, ${spellingCases.length} API/ESLint CLI fixtures, and ${collectionCases.length} installed collection-command fixtures.\n`);
 } finally {
   await rm(temporary, { recursive: true, force: true });
 }

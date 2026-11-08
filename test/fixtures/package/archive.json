@@ -7,5 +7,10 @@
   "README.md",
   "RELEASING.md",
   "package.json",
-  "src/index.js"
+  "src/cli.js",
+  "src/collect.js",
+  "src/dictionaries.js",
+  "src/index.js",
+  "src/prose.js",
+  "src/spellchecker.js"
 ]

@@ -1,3 +1,0 @@
-# First Heading
-
-### Skipped Level

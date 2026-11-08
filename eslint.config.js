@@ -3,10 +3,15 @@ import markdown from "@eslint/markdown";
 import preferences from "eslint-plugin-markdown-preferences";
 import yml from "eslint-plugin-yml";
 import documentation from "./scripts/documentation-plugin.js";
-import proseSpellcheck from "./src/index.js";
+import { createPlugin } from "./src/index.js";
+
+const proseSpellcheck = await createPlugin({
+  dictionaries: ["@cspell/dict-en_us", "@cspell/dict-software-terms", "./.spellcheck.txt"],
+  baseDir: import.meta.dirname,
+});
 
 export default [
-  { ignores: ["coverage/**", "test/fixtures/**"] },
+  { ignores: ["coverage/**", "test/fixtures/**", ".spelling-fixture-*/**"] },
   { ...js.configs.recommended, files: ["**/*.js"] },
   ...yml.configs["flat/recommended"],
   {
@@ -39,6 +44,7 @@ export default [
       }],
       "markdown-preferences/no-heading-trailing-punctuation": "error",
       "project-documentation/single-line-paragraphs": "error",
+      "prose-spellcheck/spellchecker": "error",
     },
   },
 ];

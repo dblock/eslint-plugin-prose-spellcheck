@@ -1,0 +1,143 @@
+[
+  { "name": "Valid prose, Unicode, apostrophes, and camel case", "file": "valid.md", "reports": [] },
+  { "name": "Native CommonMark", "file": "valid.md", "language": "commonmark", "reports": [] },
+  { "name": "Headings and paragraphs", "file": "misspellings.md", "reports": [
+    { "word": "helo", "source": "helo", "location": [1, 3, 1, 7] },
+    { "word": "wrng", "source": "wrng", "location": [3, 11, 3, 15] }
+  ] },
+  { "name": "Case-sensitive reviewed word list", "file": "custom.md",
+    "options": { "dictionaries": ["@cspell/dict-en_us", "./accepted.txt"] },
+    "reports": [{ "word": "zqxbrand", "source": "zqxbrand" }] },
+  { "name": "File URL vocabulary", "file": "custom.md",
+    "options": { "dictionaries": ["@cspell/dict-en_us", "$VOCABULARY_URL"] },
+    "reports": [{ "word": "zqxbrand", "source": "zqxbrand" }] },
+  { "name": "Inline vocabulary", "file": "custom.md",
+    "options": { "words": ["Zqxbrand", "ZqxbrandTool"] },
+    "reports": [{ "word": "zqxbrand", "source": "zqxbrand" }] },
+  { "name": "Dictionary replacement", "file": "replacement.md",
+    "options": { "dictionaries": ["./accepted.txt"] },
+    "reports": [{ "word": "hello", "source": "hello" }] },
+  { "name": "Contractions and compound splitting", "file": "compounds.md", "reports": [
+    { "word": "helo", "source": "helo", "occurrence": 1 },
+    { "word": "Clinet", "source": "Clinet" },
+    { "word": "helo", "source": "helo", "occurrence": 2 },
+    { "word": "helo's", "source": "helo's" }
+  ] },
+  { "name": "Visible labels, image descriptions, and URL/code exclusions", "file": "selection.md", "reports": [
+    { "word": "helo", "source": "helo" },
+    { "word": "wrng", "source": "wrng" },
+    { "word": "mispellt", "source": "mispellt" }
+  ] },
+  { "name": "Reference images and nested image markup", "file": "images.md", "reports": [
+    { "word": "helo", "source": "helo" },
+    { "word": "wrng", "source": "wrng" }
+  ] },
+  { "name": "Image descriptions preserve encoded UTF-16 spans", "file": "image-entities.md", "reports": [
+    { "word": "wrng", "source": "wr&#110;g", "location": [1, 6, 1, 15] }
+  ] },
+  { "name": "GFM image formatting and nested reference context", "file": "image-dialects.md", "reports": [
+    { "word": "wrng", "source": "wr~~ng" },
+    { "word": "wrng", "source": "wr~~ng", "occurrence": 2 }
+  ] },
+  { "name": "CommonMark image labels retain literal GFM delimiters", "file": "image-dialects.md", "language": "commonmark",
+    "options": { "words": ["wor", "wr", "ng"] }, "reports": [] },
+  { "name": "Table cells and visible link labels", "file": "table.md", "reports": [
+    { "word": "helo", "source": "helo" },
+    { "word": "wrng", "source": "wrng" }
+  ] },
+  { "name": "Word spans across emphasis", "file": "emphasis.md", "reports": [
+    { "word": "wrng", "source": "wr**ng" }
+  ] },
+  { "name": "Native suppression comments", "file": "suppression.md", "reports": [
+    { "word": "helo", "source": "helo", "occurrence": 2 }
+  ] },
+  { "name": "Liquid across inline nodes and code exclusion", "file": "liquid.md", "reports": [
+    { "word": "helo", "source": "helo" },
+    { "word": "wrng", "source": "wrng" }
+  ] },
+  { "name": "Native directives inside Liquid retain host semantics", "file": "liquid-directive.md", "reports": [] },
+  { "name": "Unmatched Liquid remains prose", "file": "liquid-unmatched.md", "reports": [
+    { "word": "helo", "source": "helo" }
+  ] },
+  { "name": "Original UTF-16 after literal and encoded emoji", "file": "emoji.md", "reports": [
+    { "word": "helo", "source": "helo", "location": [1, 4, 1, 8] },
+    { "word": "wrng", "source": "wrng", "location": [3, 11, 3, 15] }
+  ] },
+  { "name": "Escapes, entities, and original encoded spans", "file": "entities.md", "reports": [
+    { "word": "wrng", "source": "wr&#110;g" },
+    { "word": "wrng", "source": "wr&#x6e;g" },
+    { "word": "zqx", "source": "zqx" }
+  ] },
+  { "name": "Multiline list and quote offsets", "file": "multiline.md", "reports": [
+    { "word": "helo", "source": "helo", "location": [2, 5, 2, 9] },
+    { "word": "wrng", "source": "wrng", "location": [5, 3, 5, 7] }
+  ] },
+  { "name": "CRLF and no final newline", "file": "multiline.md", "lineEnding": "crlf", "finalNewline": false, "reports": [
+    { "word": "helo", "source": "helo", "location": [2, 5, 2, 9] },
+    { "word": "wrng", "source": "wrng", "location": [5, 3, 5, 7] }
+  ] },
+  { "name": "No heading or final-newline policy", "file": "misspellings.md", "finalNewline": false, "reports": [
+    { "word": "helo", "source": "helo" },
+    { "word": "wrng", "source": "wrng" }
+  ] },
+  { "name": "Recognized front matter is not body prose", "file": "frontmatter.md", "reports": [] },
+  { "name": "Spanish replacement", "file": "spanish.md",
+    "options": { "dictionaries": ["@cspell/dict-es-es"] }, "reports": [] },
+  { "name": "English and Spanish together", "file": "multilingual.md",
+    "options": { "dictionaries": ["@cspell/dict-en_us", "@cspell/dict-es-es"] }, "reports": [] },
+  { "name": "Explicit software terminology", "file": "software.md",
+    "options": { "dictionaries": ["@cspell/dict-en_us", "@cspell/dict-software-terms"] }, "reports": [] },
+  { "name": "Custom namespace", "file": "misspellings.md", "namespace": "words", "reports": [
+    { "word": "helo", "source": "helo" },
+    { "word": "wrng", "source": "wrng" }
+  ] },
+  { "name": "Local package data without following imports", "file": "fixture-dictionary.md",
+    "options": { "dictionaries": ["@prose-test/dictionary"] },
+    "dictionaryPackage": { "config": {
+      "dictionaryDefinitions": [{ "name": "local", "path": "words.txt", "type": "W" }],
+      "import": ["https://example.invalid/must-not-be-loaded.json"]
+    }, "files": { "words.txt": "fixturelexicon\n" } }, "reports": [] },
+  { "name": "Options must be an object", "options": null, "error": "options must be an object" },
+  { "name": "Unknown option", "options": { "locale": "en" }, "error": "Unknown spellchecker option" },
+  { "name": "Invalid base directory", "options": { "baseDir": "" }, "error": "baseDir must be" },
+  { "name": "Empty dictionary selection", "options": { "dictionaries": [] }, "error": "dictionaries must be" },
+  { "name": "Invalid dictionary entry", "options": { "dictionaries": [7] }, "error": "dictionaries must be" },
+  { "name": "Invalid words option", "options": { "words": true }, "error": "words must be an array" },
+  { "name": "Vocabulary rejects phrases", "options": { "words": ["two words"] }, "error": "Invalid vocabulary word" },
+  { "name": "Vocabulary rejects dictionary control syntax",
+    "options": { "dictionaries": ["./bad.txt"] }, "files": { "bad.txt": "!forbidden\n" }, "error": "Invalid vocabulary word" },
+  { "name": "Missing vocabulary", "options": { "dictionaries": ["./missing.txt"] }, "error": "ENOENT" },
+  { "name": "Remote vocabulary", "options": { "dictionaries": ["https://example.invalid/words.txt"] }, "error": "Remote dictionaries" },
+  { "name": "Unsupported dictionary resource", "options": { "dictionaries": ["./words.dic"] }, "error": "Unsupported dictionary" },
+  { "name": "Missing dictionary package", "options": { "dictionaries": ["@prose-test/not-installed"] }, "error": "Cannot find module" },
+  { "name": "Do not execute package exports", "options": { "dictionaries": ["@prose-test/dictionary"] },
+    "dictionaryPackage": { "executable": true, "config": {} }, "error": "must export JSON" },
+  { "name": "Import-only configuration is not dictionary data", "options": { "dictionaries": ["@prose-test/dictionary"] },
+    "dictionaryPackage": { "config": { "import": ["https://example.invalid/config.json"] } }, "error": "No dictionary definitions" },
+  { "name": "Null dictionary metadata is rejected", "options": { "dictionaries": ["@prose-test/dictionary"] },
+    "dictionaryPackage": { "config": null }, "error": "No dictionary definitions" },
+  { "name": "Invalid dictionary metadata JSON", "options": { "dictionaries": ["@prose-test/dictionary"] },
+    "dictionaryPackage": { "config": "{broken" }, "error": "JSON" },
+  { "name": "Invalid dictionary definition", "options": { "dictionaries": ["@prose-test/dictionary"] },
+    "dictionaryPackage": { "config": { "dictionaryDefinitions": [null] } }, "error": "Invalid dictionary definition" },
+  { "name": "Unsupported dictionary decoder is rejected", "options": { "dictionaries": ["@prose-test/dictionary"] },
+    "dictionaryPackage": { "config": { "dictionaryDefinitions": [{ "name": "local", "path": "words.txt", "type": "unknown" }] } },
+    "error": "Invalid dictionary definition" },
+  { "name": "Invalid dictionary selection", "options": { "dictionaries": ["@prose-test/dictionary"] },
+    "dictionaryPackage": { "config": { "dictionaryDefinitions": [{ "name": "local", "path": "words.txt" }], "dictionaries": "local" } },
+    "error": "Invalid dictionary selection" },
+  { "name": "No selected checkable dictionaries", "options": { "dictionaries": ["@prose-test/dictionary"] },
+    "dictionaryPackage": { "config": { "dictionaryDefinitions": [{ "name": "local", "path": "words.txt" }], "dictionaries": ["missing"] } },
+    "error": "No spelling dictionaries selected" },
+  { "name": "Remote package dictionary data", "options": { "dictionaries": ["@prose-test/dictionary"] },
+    "dictionaryPackage": { "config": { "dictionaryDefinitions": [{ "name": "local", "path": "https://example.invalid/words.txt" }] } },
+    "error": "Remote dictionaries" },
+  { "name": "Dictionary data loading failure", "options": { "dictionaries": ["@prose-test/dictionary"] },
+    "dictionaryPackage": { "config": { "dictionaryDefinitions": [{ "name": "local", "path": "missing.txt" }] } },
+    "error": "Cannot load dictionaries" },
+  { "name": "Corrupt dictionary data", "options": { "dictionaries": ["@prose-test/dictionary"] },
+    "dictionaryPackage": { "config": { "dictionaryDefinitions": [{ "name": "local", "path": "words.txt.gz" }] },
+      "files": { "words.txt.gz": { "base64": "H4sIAAAAAAAAAw==" } } }, "error": "Cannot load dictionaries" },
+  { "name": "Rule options are rejected rather than silently ignored",
+    "rules": { "prose-spellcheck/spellchecker": ["error", { "words": ["helo"] }] }, "error": "more than 0 items" }
+]
