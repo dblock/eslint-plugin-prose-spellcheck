@@ -16,7 +16,7 @@ Cache successful package dictionaries by resolved metadata path; retry failed lo
 
 ## Collection
 
-The collector uses the actual ESLint configuration and unsuppressed spelling diagnostics. Abort on other lint errors or selection without an enabled spelling rule. Sort and deduplicate candidates; create output exclusively without overwriting files, changing source, or editing configuration. Users must review candidates before accepting them.
+The collector uses the actual ESLint configuration and unsuppressed spelling diagnostics. Abort on other lint errors or selection without an enabled spelling rule. Sort and deduplicate candidates; create output exclusively without overwriting files, changing source, or editing configuration. Optional stdout-only context reports retain each candidate's first source location in lexical path order. Users must review candidates before accepting them.
 
 ## Limits
 

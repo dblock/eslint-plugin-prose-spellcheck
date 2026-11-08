@@ -3,6 +3,7 @@
 ## 0.1.2 (Next)
 
 - [#9](https://github.com/dblock/eslint-plugin-prose-spellcheck/pull/9): Confirm registry publication after next-version preparation and tolerate visibility timeouts - [@dblock](https://github.com/dblock).
+- [#10](https://github.com/dblock/eslint-plugin-prose-spellcheck/pull/10): Add collection context reports with each candidate's first source location - [@dblock](https://github.com/dblock).
 - Your contribution here.
 
 ## 0.1.1 (2026/11/08)

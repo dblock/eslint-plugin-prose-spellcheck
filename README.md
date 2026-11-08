@@ -61,6 +61,14 @@ Reviewed words are now accepted; fix remaining misspellings in the source. Unkno
 
 For collection, omit `--output` to print candidates, or pass `--config path` to select an ESLint configuration. If a vocabulary file already exists, collect into a different file and review additions before merging them.
 
+To find a candidate in its source before accepting it, use `--context`:
+
+```sh
+npx eslint-prose-spellcheck collect "**/*.md" --context
+```
+
+This prints each sorted candidate followed by a tab and its first `file:line:column` location. Files are considered in lexical path order, with paths relative to the working directory using `/` separators; lines and original UTF-16 columns start at one. Only unsuppressed spelling diagnostics are included. Context reports are for review, not vocabulary files; `--context` cannot be combined with `--output`.
+
 ## Configuration
 
 ### `dictionaries`
