@@ -1,0 +1,12 @@
+[
+  {
+    "file": "valid.md",
+    "diagnostics": []
+  },
+  {
+    "file": "invalid.md",
+    "diagnostics": [
+      { "ruleId": "markdown/heading-increment", "line": 3, "column": 1 }
+    ]
+  }
+]

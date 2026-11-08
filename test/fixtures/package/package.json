@@ -1,0 +1,9 @@
+{
+  "name": "prose-spellcheck-package-consumer",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "@eslint/markdown": "8.0.3",
+    "eslint": "10.14.0"
+  }
+}

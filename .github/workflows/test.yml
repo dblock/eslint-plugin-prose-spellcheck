@@ -1,0 +1,41 @@
+name: Test
+
+on:
+  push:
+    branches: [master]
+  pull_request: {}
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: Node ${{ matrix.entry.node }} on ${{ matrix.entry.os }}
+    runs-on: ${{ matrix.entry.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        entry:
+          - { node: '22.18.0', os: ubuntu-latest, command: 'npm test', coverage: false }
+          - { node: '22.23.4', os: ubuntu-latest, command: 'npm test', coverage: false }
+          - { node: '24.22.2', os: ubuntu-latest, command: 'npm test', coverage: false }
+          - { node: '26.13.0', os: ubuntu-latest, command: 'npm run test:coverage', coverage: true }
+          - { node: '26.13.0', os: macos-latest, command: 'npm test', coverage: false }
+          - { node: '26.13.0', os: windows-latest, command: 'npm test', coverage: false }
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7.0.1
+      - name: Setup Node
+        uses: actions/setup-node@v7.1.0
+        with:
+          node-version: ${{ matrix.entry.node }}
+          cache: npm
+      - name: Install Dependencies
+        run: npm ci
+      - name: Run Tests
+        run: ${{ matrix.entry.command }}
+      - name: Report Coverage
+        if: matrix.entry.coverage
+        uses: coverallsapp/github-action@v2.3.8
+        with:
+          file: coverage/lcov.info

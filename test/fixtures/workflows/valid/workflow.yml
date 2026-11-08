@@ -1,0 +1,11 @@
+name: Test and Lint
+jobs:
+  machine-job-id:
+    name: Node ${{ matrix.entry.node }} on Linux
+    steps:
+      - name: Run npm and ESLint
+        run: npm run lint
+        with:
+          name: machine-option-not-a-display-name
+      - name: Check `camelCase` Identifiers
+        run: echo ok

@@ -1,0 +1,9 @@
+import markdown from "@eslint/markdown";
+import proseSpellcheck from "eslint-plugin-prose-spellcheck";
+
+export default [{
+  files: ["*.md"],
+  plugins: { markdown, "prose-spellcheck": proseSpellcheck },
+  language: "markdown/gfm",
+  rules: { "markdown/heading-increment": "error" },
+}];

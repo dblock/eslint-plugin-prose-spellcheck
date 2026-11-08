@@ -1,0 +1,9 @@
+name: test and lint
+jobs:
+  test:
+    name: 7
+    steps:
+      - name: run tests
+        run: npm test
+      - name: ""
+        run: echo ok

@@ -1,0 +1,59 @@
+[
+  {
+    "name": "Valid native prose and links",
+    "file": "valid.md",
+    "mode": "native",
+    "diagnostics": []
+  },
+  {
+    "name": "Wrapped prose",
+    "file": "wrapped.md",
+    "mode": "native",
+    "diagnostics": [
+      { "ruleId": "project-documentation/single-line-paragraphs", "line": 3, "column": 1 }
+    ]
+  },
+  {
+    "name": "Wrapped blockquote prose",
+    "file": "blockquote.md",
+    "mode": "native",
+    "diagnostics": [
+      { "ruleId": "project-documentation/single-line-paragraphs", "line": 3, "column": 3 }
+    ]
+  },
+  {
+    "name": "Heading capitalization",
+    "file": "heading.md",
+    "mode": "native",
+    "diagnostics": [
+      { "ruleId": "markdown-preferences/heading-casing", "line": 1, "column": 3 },
+      { "ruleId": "markdown-preferences/heading-casing", "line": 1, "column": 11 }
+    ]
+  },
+  {
+    "name": "Native ESLint suppression",
+    "file": "suppressed.md",
+    "mode": "native",
+    "diagnostics": []
+  },
+  {
+    "name": "Native prose pass excludes fenced JavaScript",
+    "file": "embedded-invalid.md",
+    "mode": "native",
+    "diagnostics": []
+  },
+  {
+    "name": "Embedded JavaScript is checked separately",
+    "file": "embedded-invalid.md",
+    "mode": "embedded",
+    "diagnostics": [
+      { "ruleId": "no-unused-vars", "line": 4, "column": 7 }
+    ]
+  },
+  {
+    "name": "Valid embedded JavaScript",
+    "file": "embedded-valid.md",
+    "mode": "embedded",
+    "diagnostics": []
+  }
+]
