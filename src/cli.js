@@ -10,12 +10,13 @@ try {
     options: {
       config: { type: "string" },
       output: { type: "string" },
+      context: { type: "boolean" },
       help: { type: "boolean" },
     },
     allowPositionals: true,
   });
   if (values.help) {
-    process.stdout.write("Usage: eslint-prose-spellcheck collect [--config path] [--output path] <files/globs...>\nReview candidates before adding them to dictionaries. Existing files are never overwritten.\n");
+    process.stdout.write("Usage: eslint-prose-spellcheck collect [--config path] [--output path | --context] <files/globs...>\nReview candidates before adding them to dictionaries. Existing files are never overwritten.\nUse --context for tab-separated words and file:line:column locations on stdout.\n");
   } else {
     const [command, ...patterns] = positionals;
     if (command !== "collect" || !patterns.length) {
@@ -24,11 +25,17 @@ try {
     if (values.config !== undefined && !values.config.trim()) {
       throw new Error("--config must be a nonempty path.");
     }
+    if (values.context && values.output !== undefined) {
+      throw new Error("--context cannot be combined with --output.");
+    }
     const words = await collectWords(patterns, {
       cwd: process.cwd(),
       ...(values.config ? { overrideConfigFile: resolve(values.config) } : {}),
     });
-    const text = words.length ? `${words.join("\n")}\n` : "";
+    const lines = words.map(({ word, file, line, column }) =>
+      values.context ? `${word}\t${file}:${line}:${column}` : word,
+    );
+    const text = lines.length ? `${lines.join("\n")}\n` : "";
     if (values.output !== undefined) {
       if (!values.output.trim()) throw new Error("--output must be a nonempty path.");
       await writeFile(resolve(values.output), text, { flag: "wx" });
