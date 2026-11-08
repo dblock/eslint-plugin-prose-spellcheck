@@ -1,8 +1,9 @@
 import assert from "node:assert/strict";
 import { execFileSync, spawnSync } from "node:child_process";
+import { constants } from "node:fs";
 import { copyFile, mkdtemp, readFile, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
-import { join } from "node:path";
+import { join, resolve } from "node:path";
 import process from "node:process";
 import { fileURLToPath, URL } from "node:url";
 import { collectionCases, fixtureDiagnostics, prepareCollection, prepareFixture, spellingCases, spellingDiagnostics } from "./spelling-fixtures.js";
@@ -25,6 +26,7 @@ function runNpm(args, cwd) {
 }
 
 try {
+  assert.ok(process.argv.length <= 3, "Usage: npm run test:package -- [output-archive.tgz]");
   const packResult = JSON.parse(runNpm([
     "pack", "--json", "--pack-destination", temporary,
   ], root));
@@ -86,6 +88,9 @@ try {
     if (fixture.absent) {
       await assert.rejects(readFile(join(temporary, fixture.absent)), { code: "ENOENT" });
     }
+  }
+  if (process.argv[2]) {
+    await copyFile(archive, resolve(root, process.argv[2]), constants.COPYFILE_EXCL);
   }
   process.stdout.write(`Validated ${packed.filename}: ${entries.length} archive entries, ${spellingCases.length} API/ESLint CLI fixtures, and ${collectionCases.length} installed collection-command fixtures.\n`);
 } finally {

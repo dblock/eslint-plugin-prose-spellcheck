@@ -1,6 +1,6 @@
 # Working on eslint-plugin-prose-spellcheck
 
-Read [CONTRIBUTING.md](CONTRIBUTING.md) and [DESIGN.md](DESIGN.md) before editing. This unreleased package provides native Markdown spelling and a reviewed vocabulary collection command; do not publish without approval.
+Read [CONTRIBUTING.md](CONTRIBUTING.md) and [DESIGN.md](DESIGN.md) before editing. This package provides native Markdown spelling and a reviewed vocabulary collection command; do not publish without approval.
 
 ## Implementation Invariants
 
@@ -34,4 +34,4 @@ Task-owned topic history may be amended or squashed without additional authoriza
 
 After merges, follow verified post-merge cleanup in CONTRIBUTING: fetch/prune, verify through GitHub, check dirty/untracked and dependent work, switch safely, then remove only clean unused worktrees and merged local branches. Never delete active PR work or `master`.
 
-Do not merge, publish, create release tags/releases or artwork, set credentials, overwrite published versions/tags, or change release protections without explicit authorization. Release instructions in [RELEASING.md](RELEASING.md) remain provisional; no direct-push release automation is authorized.
+Do not merge, publish, create release tags/releases or artwork, set credentials, overwrite published versions/tags, or change release protections without explicit authorization. Manual release instructions are in [RELEASING.md](RELEASING.md); no direct-push release automation is authorized.
