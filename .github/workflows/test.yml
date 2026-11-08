@@ -27,9 +27,9 @@ jobs:
           node-version: ${{ matrix.entry.node }}
           cache: npm
       - name: Install Dependencies
-        run: npm ci
+        run: npm ci ${{ matrix.entry.node == '22.18.0' && '--engine-strict=false' || '' }}
       - name: Select ESLint Compatibility Pair
-        run: npm install --no-save --package-lock=false --strict-peer-deps eslint@${{ matrix.entry.eslint }} @eslint/js@${{ matrix.entry.js }}
+        run: npm install --no-save --package-lock=false --strict-peer-deps ${{ matrix.entry.node == '22.18.0' && '--engine-strict=false' || '' }} eslint@${{ matrix.entry.eslint }} @eslint/js@${{ matrix.entry.js }}
       - name: Run Tests
         run: ${{ matrix.entry.command }}
       - name: Report Coverage

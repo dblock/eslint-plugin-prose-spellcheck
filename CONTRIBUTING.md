@@ -4,6 +4,8 @@
 
 Use Node.js `^22.18.0 || >=24.0.0` and ESLint `^9.39.0 || ^10.0.0`; Node.js 26.13.0 and ESLint 10.14.0 are the current development baseline. Install the committed lockfile with `npm ci`. When selecting or updating dependencies and Actions, verify the latest stable releases while preserving supported-runtime compatibility.
 
+Development-only release-it requires Node.js `^22.22.2 || ^24.15.0 || >=26.0.0`; use `.nvmrc` for full development and release validation. For minimum-runtime testing on Node.js 22.18.0, install development dependencies and compatibility pairs with `--engine-strict=false`. This does not change runtime support: packed consumers explicitly enforce strict engines and peers, and all spelling/collection fixtures still run. Only native release-it integration tests require the newer release runtime and a non-Windows host.
+
 ```sh
 npm ci
 npm test
@@ -20,6 +22,8 @@ Run `npm test` or `npm run test:coverage` and `npm run lint` locally before ever
 
 Tests use `node --test`. Runtime, collection, and workflow checks use data-driven files in `test/fixtures/`; intentional failures are excluded from repository linting. Run focused runtime tests with `node --test test/spelling.test.js test/collect.test.js`; run workflow checks with `node --test test/workflow-names.test.js`. Owned temporary fixture consumers are ignored and cleaned up; never patch actual installed dependencies.
 
+Run release checks with `node --test test/release.test.js`. Changelog fixtures cover synchronized versions, overrides, and invalid notes; isolated Git repositories exercise native release-it with simulated npm publication and registry responses. These tests never publish packages or create real GitHub releases.
+
 `npm run test:package` creates a real npm tarball, inspects its archive, installs it into an owned temporary consumer, and compares public ESLint API and actual ESLint CLI diagnostics using the same spelling and error fixtures. The consumer installs and verifies the exact ESLint version running the checker, with strict engine and peer checks. It also invokes the installed `eslint-prose-spellcheck` executable against the collection fixtures. It cleans up only its own temporary directory. Assertions cover report-only behavior with fixing enabled and prevent candidate output from overwriting vocabulary or source.
 
 Distribute compatibility coverage across suites instead of repeating every version on every platform: Ubuntu source tests use ESLint 9.39.0 and 10.14.0; Windows and macOS packed consumers use 9.39.5 and 10.0.0 respectively. This covers both ESLint floors and latest releases, minimum/latest Node, and all three platforms with four matrix entries plus Lint. ESLint 9 is deprecated upstream; testing it provides compatibility, not a recommendation to downgrade. Select the matching ESLint and JavaScript configuration pair with `npm install --no-save --package-lock=false --strict-peer-deps eslint@<version> @eslint/js@<matching-version>`, then run the normal checks. Use `npm ci` to restore the locked development baseline afterward; do not use legacy peer resolution to claim compatibility.
@@ -34,7 +38,9 @@ Prefer one coherent commit per PR; useful independently reviewable commits are a
 
 Task-owned topic commits may be amended or squashed without additional approval. Verify ownership and record the remote tip first, reconcile remote changes, run local tests and lint, and push using `--force-with-lease` against that recorded SHA. Never use plain force or rewrite another contributor's or task's work.
 
-Update affected documentation and add linked changelog entries for features, improvements, and fixes, but not minor typos or the initial scaffold. Predict the next shared issue/PR number before opening a PR, then verify and correct it immediately. Append entries oldest first above the Next placeholder using `- [#123](https://github.com/dblock/eslint-plugin-prose-spellcheck/pull/123): Description - [@author](https://github.com/author).` Put version bumps in the same PR and follow the version policy in [AGENTS.md](AGENTS.md). See [RELEASING.md](RELEASING.md) for manual release instructions.
+Update affected documentation and add linked changelog entries for features, improvements, and fixes, but not minor typos or the initial scaffold. Predict the next shared issue/PR number before opening a PR, then verify and correct it immediately. Append entries oldest first above the Next placeholder using `- [#123](https://github.com/dblock/eslint-plugin-prose-spellcheck/pull/123): Description - [@author](https://github.com/author).` Follow the verified-release version policy in [AGENTS.md](AGENTS.md), retaining unreleased versions. See [RELEASING.md](RELEASING.md) for release instructions.
+
+The explicitly authorized manual Release workflow may push release metadata and its matching tag atomically, then push the validated next development patch without PRs. The no-App exception permits all writers to push directly, but ordinary development remains PR-only. Force-push and deletion protections stay active without bypass actors. Setup or PR approval does not authorize a release dispatch.
 
 Include `Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>` in AI-assisted commits. AI-authored PRs and comments must disclose AI authorship on behalf of `@dblock`. Use closing issue references in implementation PRs, leaving issues open until merge.
 

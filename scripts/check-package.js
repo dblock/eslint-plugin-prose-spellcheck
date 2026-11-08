@@ -3,7 +3,7 @@ import { execFileSync, spawnSync } from "node:child_process";
 import { constants } from "node:fs";
 import { copyFile, mkdtemp, readFile, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
-import { join, resolve } from "node:path";
+import { basename, join, resolve } from "node:path";
 import process from "node:process";
 import { fileURLToPath, URL } from "node:url";
 import { ESLint } from "eslint";
@@ -28,11 +28,20 @@ function runNpm(args, cwd) {
 
 try {
   assert.ok(process.argv.length <= 3, "Usage: npm run test:package -- [output-archive.tgz]");
-  const packResult = JSON.parse(runNpm([
-    "pack", "--json", "--pack-destination", temporary,
-  ], root));
-  const [packed] = Array.isArray(packResult) ? packResult : Object.values(packResult);
-  const archive = join(temporary, packed.filename);
+  let archive = process.env.PROSE_SPELLCHECK_PACKAGE_ARCHIVE;
+  if (archive) {
+    archive = resolve(root, archive);
+  } else {
+    const packResult = JSON.parse(runNpm([
+      "pack", "--json", "--pack-destination", temporary,
+    ], root));
+    const [packed] = Array.isArray(packResult) ? packResult : Object.values(packResult);
+    archive = join(temporary, packed.filename);
+  }
+  const manifest = JSON.parse(execFileSync("tar", ["-xOf", archive, "package/package.json"], { encoding: "utf8" }));
+  const source = JSON.parse(await readFile(join(root, "package.json"), "utf8"));
+  assert.equal(manifest.name, source.name, "Validate this package's archive.");
+  assert.equal(manifest.version, source.version, "Validate the checked-in version.");
   const entries = execFileSync("tar", ["-tzf", archive], { encoding: "utf8" })
     .trim().split(/\r?\n/u).map((entry) => entry.replace(/^package\//u, "")).sort();
   const expectedEntries = JSON.parse(await readFile(new URL("archive.json", fixtures), "utf8"));
@@ -98,7 +107,7 @@ try {
   if (process.argv[2]) {
     await copyFile(archive, resolve(root, process.argv[2]), constants.COPYFILE_EXCL);
   }
-  process.stdout.write(`Validated ${packed.filename} with ESLint ${ESLint.version}: ${entries.length} archive entries, ${spellingCases.length} API/ESLint CLI fixtures, and ${collectionCases.length} installed collection-command fixtures.\n`);
+  process.stdout.write(`Validated ${basename(archive)} with ESLint ${ESLint.version}: ${entries.length} archive entries, ${spellingCases.length} API/ESLint CLI fixtures, and ${collectionCases.length} installed collection-command fixtures.\n`);
 } finally {
   await rm(temporary, { recursive: true, force: true });
 }

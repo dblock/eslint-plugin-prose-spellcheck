@@ -1,0 +1,46 @@
+[
+  {
+    "name": "release notes and previous entries",
+    "current": "0.1.1",
+    "version": "0.1.1",
+    "input": "# Changelog\n\n## 0.1.1 (Next)\n\n- A useful change.\n- Your contribution here.\n\n## 0.1.0 (2026/11/08)\n\n- Initial release.\n",
+    "expected": "# Changelog\n\n## 0.1.1 (2026/11/08)\n\n- A useful change.\n\n## 0.1.0 (2026/11/08)\n\n- Initial release.\n",
+    "next": "# Changelog\n\n## 0.1.2 (Next)\n\n- Your contribution here.\n\n## 0.1.1 (2026/11/08)\n\n- A useful change.\n\n## 0.1.0 (2026/11/08)\n\n- Initial release.\n"
+  },
+  {
+    "name": "version override without previous release",
+    "current": "0.1.1",
+    "version": "0.2.0",
+    "input": "# Changelog\n\n## 0.1.1 (Next)\n\n- A useful change.\n",
+    "expected": "# Changelog\n\n## 0.2.0 (2026/11/08)\n\n- A useful change.\n",
+    "next": "# Changelog\n\n## 0.2.1 (Next)\n\n- Your contribution here.\n\n## 0.2.0 (2026/11/08)\n\n- A useful change.\n"
+  },
+  {
+    "name": "placeholder only",
+    "current": "0.1.1",
+    "version": "0.1.1",
+    "input": "# Changelog\n\n## 0.1.1 (Next)\n\n- Your contribution here.\n",
+    "error": "meaningful"
+  },
+  {
+    "name": "missing Next heading",
+    "current": "0.1.1",
+    "version": "0.1.1",
+    "input": "# Changelog\n\n## 0.1.0 (2026/11/08)\n\n- Initial release.\n",
+    "error": "exactly one"
+  },
+  {
+    "name": "duplicate Next headings",
+    "current": "0.1.1",
+    "version": "0.1.1",
+    "input": "# Changelog\n\n## 0.1.1 (Next)\n\n- A change.\n\n## 0.1.2 (Next)\n\n- Another change.\n",
+    "error": "exactly one"
+  },
+  {
+    "name": "unsynchronized heading",
+    "current": "0.1.1",
+    "version": "0.1.1",
+    "input": "# Changelog\n\n## 0.2.0 (Next)\n\n- A change.\n",
+    "error": "heading"
+  }
+]
