@@ -2,7 +2,7 @@
 
 ## Setup and Validation
 
-Use Node.js `^22.18.0 || >=24.0.0`; Node.js 26.13.0 is the current development and CI baseline. Install the committed lockfile with `npm ci`. When selecting or updating dependencies and Actions, verify the latest stable releases while preserving supported-runtime compatibility.
+Use Node.js `^22.18.0 || >=24.0.0` and ESLint `^9.39.0 || ^10.0.0`; Node.js 26.13.0 and ESLint 10.14.0 are the current development baseline. Install the committed lockfile with `npm ci`. When selecting or updating dependencies and Actions, verify the latest stable releases while preserving supported-runtime compatibility.
 
 ```sh
 npm ci
@@ -20,7 +20,9 @@ Run `npm test` or `npm run test:coverage` and `npm run lint` locally before ever
 
 Tests use `node --test`. Runtime, collection, and workflow checks use data-driven files in `test/fixtures/`; intentional failures are excluded from repository linting. Run focused runtime tests with `node --test test/spelling.test.js test/collect.test.js`; run workflow checks with `node --test test/workflow-names.test.js`. Owned temporary fixture consumers are ignored and cleaned up; never patch actual installed dependencies.
 
-`npm run test:package` creates a real npm tarball, inspects its archive, installs it into an owned temporary consumer, and compares public ESLint API and actual ESLint CLI diagnostics using the same spelling and error fixtures. It also invokes the installed `eslint-prose-spellcheck` executable against the collection fixtures. It cleans up only its own temporary directory. Assertions cover report-only behavior with fixing enabled and prevent candidate output from overwriting vocabulary or source.
+`npm run test:package` creates a real npm tarball, inspects its archive, installs it into an owned temporary consumer, and compares public ESLint API and actual ESLint CLI diagnostics using the same spelling and error fixtures. The consumer installs and verifies the exact ESLint version running the checker, with strict engine and peer checks. It also invokes the installed `eslint-prose-spellcheck` executable against the collection fixtures. It cleans up only its own temporary directory. Assertions cover report-only behavior with fixing enabled and prevent candidate output from overwriting vocabulary or source.
+
+Distribute compatibility coverage across suites instead of repeating every version on every platform: Ubuntu source tests use ESLint 9.39.0 and 10.14.0; Windows and macOS packed consumers use 9.39.5 and 10.0.0 respectively. This covers both ESLint floors and latest releases, minimum/latest Node, and all three platforms with four matrix entries plus Lint. ESLint 9 is deprecated upstream; testing it provides compatibility, not a recommendation to downgrade. Select the matching ESLint and JavaScript configuration pair with `npm install --no-save --package-lock=false --strict-peer-deps eslint@<version> @eslint/js@<matching-version>`, then run the normal checks. Use `npm ci` to restore the locked development baseline afterward; do not use legacy peer resolution to claim compatibility.
 
 `npm run test:coverage` includes child-process coverage and reports lines and branches. Aim close to 100% of project-owned runtime code with meaningful cases, especially configuration errors, loading failures, Unicode locations, and collection safety. Do not hide implementation code or add trivial assertions to raise percentages; report real gaps. Keep the Test, Lint, and Package workflows separate, use explicit inline `matrix.entry` combinations without include/exclude, and maintain Coveralls reporting.
 
