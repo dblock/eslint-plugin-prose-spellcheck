@@ -13,7 +13,7 @@ Checks native Markdown prose, headings, visible link labels, and image descripti
 Requires Node.js 22.18.0 or later in the 22.x series, or Node.js 24 or later. Install alongside ESLint and its Markdown language plugin:
 
 ```sh
-npm install --save-dev eslint @eslint/markdown eslint-plugin-prose-spellcheck@0.1.0
+npm install --save-dev eslint @eslint/markdown eslint-plugin-prose-spellcheck@0.1.1
 ```
 
 ## Usage
