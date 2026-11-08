@@ -7,15 +7,15 @@ import { test } from "node:test";
 import { gzipSync } from "node:zlib";
 import { ESLint } from "eslint";
 import markdown from "@eslint/markdown";
-import { createPlugin } from "../src/index.js";
+import plugin from "../src/index.js";
 import { fixtureDiagnostics, fixtureOptions, prepareFixture, spellingCases, spellingDiagnostics } from "../scripts/spelling-fixtures.js";
 
 const root = fileURLToPath(new URL("../", import.meta.url));
 
-async function linter(options, fixture = {}) {
-  const plugin = await createPlugin(options);
+async function linter(options = {}, fixture = {}) {
   const namespace = fixture.namespace ?? "prose-spellcheck";
   return new ESLint({
+    cwd: fixture.cwd ?? root,
     overrideConfigFile: true,
     fix: true,
     overrideConfig: [{
@@ -23,7 +23,10 @@ async function linter(options, fixture = {}) {
       plugins: { markdown, [namespace]: plugin },
       language: `markdown/${fixture.language ?? "gfm"}`,
       languageOptions: { frontmatter: "yaml" },
-      rules: { [`${namespace}/spellchecker`]: "error", ...fixture.rules },
+      rules: {
+        [`${namespace}/spellcheck`]: fixture.omitOptions ? "error" : ["error", options],
+        ...fixture.rules,
+      },
     }],
   });
 }
@@ -62,7 +65,7 @@ for (const fixture of spellingCases) {
     try {
       const text = await prepareFixture(fixture, directory);
       const run = async () => {
-        const eslint = await linter(fixtureOptions(fixture, directory), fixture);
+        const eslint = await linter(fixtureOptions(fixture, directory), { ...fixture, cwd: directory });
         const [result] = await eslint.lintText(text, { filePath: "input.md" });
         assert.equal(result.output, undefined, "Spelling must not rewrite source with fix enabled.");
         assert.deepEqual(spellingDiagnostics(result.messages),
@@ -82,7 +85,8 @@ test("Dictionary failure retries without retaining a failed engine cache entry",
     const fixture = spellingCases.find((entry) => entry.name === "Corrupt dictionary data");
     await prepareFixture(fixture, directory);
     const options = fixtureOptions(fixture, directory);
-    await assert.rejects(createPlugin(options), /Cannot load dictionaries/u);
+    const failed = await linter(options);
+    await assert.rejects(failed.lintText("Zqxfixed", { filePath: "input.md" }), /Cannot load dictionaries/u);
     await writeFile(join(directory, "node_modules/@prose-test/dictionary/words.txt.gz"), gzipSync("Zqxfixed\n"));
     const eslint = await linter(options);
     const [result] = await eslint.lintText("Zqxfixed", { filePath: "input.md" });
@@ -92,18 +96,23 @@ test("Dictionary failure retries without retaining a failed engine cache entry",
   }
 });
 
-test("Shared package preparation keeps vocabulary snapshots instance-local", async () => {
+test("Rule vocabulary remains isolated and observes edits on the next scan", async () => {
   const directory = await mkdtemp(join(root, ".spelling-fixture-"));
   try {
     await writeFile(join(directory, "vocabulary.txt"), "Zqxfirst\n");
+    await writeFile(join(directory, "independent.txt"), "Zqxsecond\n");
     const options = { baseDir: directory, dictionaries: ["@cspell/dict-en_us", "./vocabulary.txt"] };
-    const [first, inline] = await Promise.all([
-      linter(options), linter({ baseDir: directory, words: ["Zqxsecond"] }),
+    const [first, independent] = await Promise.all([
+      linter(options),
+      linter({ baseDir: directory, dictionaries: ["@cspell/dict-en_us", "./independent.txt"] }),
     ]);
+    const text = "Zqxfirst Zqxsecond";
+    const [before] = await first.lintText(text, { filePath: "input.md" });
+    assert.deepEqual(spellingDiagnostics(before.messages),
+      fixtureDiagnostics(text, [{ word: "Zqxsecond", source: "Zqxsecond" }]));
     await writeFile(join(directory, "vocabulary.txt"), "Zqxsecond\n");
     const second = await linter(options);
-    for (const [eslint, unknown] of [[first, "Zqxsecond"], [second, "Zqxfirst"], [inline, "Zqxfirst"]]) {
-      const text = "Zqxfirst Zqxsecond";
+    for (const [eslint, unknown] of [[first, "Zqxfirst"], [second, "Zqxfirst"], [independent, "Zqxfirst"]]) {
       const [result] = await eslint.lintText(text, { filePath: "input.md" });
       assert.deepEqual(spellingDiagnostics(result.messages),
         fixtureDiagnostics(text, [{ word: unknown, source: unknown }]));

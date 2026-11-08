@@ -1,18 +1,25 @@
-import { readFile } from "node:fs/promises";
+import { readFileSync } from "node:fs";
 import { createRequire } from "node:module";
 import { dirname, resolve } from "node:path";
-import process from "node:process";
 import { fileURLToPath } from "node:url";
-import { getDictionary } from "cspell-lib";
+import { gunzipSync } from "node:zlib";
+import {
+  createCollection, createFlagWordsDictionary, createFlagWordsDictionaryFromTrieFile,
+  createSpellingDictionary, createSpellingDictionaryFromTrieFile,
+  createSuggestDictionary, createSuggestDictionaryFromTrieFile,
+} from "cspell-dictionary";
 
 const packages = new Map();
 const bundledRequire = createRequire(import.meta.url);
-let preparation = 0;
 const packageName = /^(?:@[a-z0-9][a-z0-9._-]*\/)?[a-z0-9][a-z0-9._-]*$/u;
 const vocabularyWord = /^\p{L}[\p{L}\p{M}\p{N}_]*(?:['’.-][\p{L}\p{M}\p{N}_]+)*$/u;
+const constructors = new Map([
+  ["flag-words", [createFlagWordsDictionary, createFlagWordsDictionaryFromTrieFile]],
+  ["suggest-words", [createSuggestDictionary, createSuggestDictionaryFromTrieFile]],
+]);
 
 function requireWord(word, source) {
-  if (typeof word !== "string" || !vocabularyWord.test(word)) {
+  if (!vocabularyWord.test(word)) {
     throw new TypeError(`Invalid vocabulary word in ${source}: ${JSON.stringify(word)}.`);
   }
   return word.replaceAll("’", "'");
@@ -26,8 +33,8 @@ function localPath(value, baseDir) {
   return resolve(baseDir, value);
 }
 
-async function loadPackage(filename) {
-  const config = JSON.parse(await readFile(filename, "utf8"));
+function loadPackage(filename) {
+  const config = JSON.parse(readFileSync(filename, "utf8"));
   if (!config || !Array.isArray(config.dictionaryDefinitions) || !config.dictionaryDefinitions.length) {
     throw new TypeError(`No dictionary definitions in ${filename}.`);
   }
@@ -43,72 +50,58 @@ async function loadPackage(filename) {
   if (selected !== undefined && (!Array.isArray(selected) || selected.some((name) => typeof name !== "string"))) {
     throw new TypeError(`Invalid dictionary selection in ${filename}.`);
   }
-  const attempt = ++preparation;
   const definitions = config.dictionaryDefinitions
     .filter((definition) => !selected?.length || selected.includes(definition.name))
     .filter((definition) => definition.kind !== "suggestions")
-    .map((definition, index) => {
-      // Unique preparation names keep CSpell's failed-load cache out of retries.
-      return {
-        name: `prose-spellcheck:${filename}:${attempt}:${index}`,
-        path: localPath(definition.path, dirname(filename)),
-        type: definition.type,
-        kind: definition.kind,
-        repMap: definition.repMap,
-        noSuggest: definition.noSuggest,
-        ignoreForbiddenWords: definition.ignoreForbiddenWords,
-      };
-    });
+    .map((definition) => ({ ...definition, path: localPath(definition.path, dirname(filename)) }));
   if (!definitions.length) throw new TypeError(`No spelling dictionaries selected in ${filename}.`);
-  const dictionary = await getDictionary({
-    dictionaries: definitions.map((definition) => definition.name),
-    dictionaryDefinitions: definitions,
-  });
-  const errors = dictionary.getErrors();
-  if (errors.length) throw new AggregateError(errors, `Cannot load dictionaries from ${filename}.`);
-  return dictionary;
+  try {
+    const dictionaries = definitions.map((definition) => {
+      let data = readFileSync(definition.path);
+      if (data[0] === 0x1f && data[1] === 0x8b) data = gunzipSync(data);
+      const [fromWords, fromTrie] = constructors.get(definition.kind) ??
+        [createSpellingDictionary, createSpellingDictionaryFromTrieFile];
+      const options = { ...definition, noSuggest: definition.noSuggest || definition.kind === "ignore-words" };
+      if (definition.type === "T" || /\.b?trie\b/iu.test(definition.path)) {
+        return fromTrie(data, definition.name, definition.path, options);
+      }
+      let lines = data.toString("utf8").split(/\r\n|\r|\n/u);
+      const split = definition.type === "C" ? /[^\w\p{L}\p{M}'’]+/u : /\s+/u;
+      const legacy = ["C", "W"].includes(definition.type);
+      if (legacy) {
+        lines = lines.flatMap((line) => line.replace(/#.*/u, "").split(split)).filter(Boolean);
+      }
+      return fromWords(lines, definition.name, definition.path, options, legacy);
+    });
+    return createCollection(dictionaries, filename);
+  } catch (error) {
+    throw new Error(`Cannot load dictionaries from ${filename}.`, { cause: error });
+  }
 }
 
 function packageDictionary(filename) {
-  let pending = packages.get(filename);
-  if (!pending) {
-    pending = loadPackage(filename).catch((error) => {
-      packages.delete(filename);
-      throw error;
-    });
-    packages.set(filename, pending);
-  }
-  return pending;
+  if (!packages.has(filename)) packages.set(filename, loadPackage(filename));
+  return packages.get(filename);
 }
 
-export async function prepareDictionaries(options) {
-  if (!options || typeof options !== "object" || Array.isArray(options)) {
-    throw new TypeError("Spellchecker options must be an object.");
-  }
-  for (const key of Object.keys(options)) {
-    if (!["dictionaries", "baseDir", "words"].includes(key)) {
-      throw new TypeError(`Unknown spellchecker option: ${key}.`);
-    }
-  }
-  const { dictionaries = ["@cspell/dict-en_us"], baseDir = process.cwd(), words = [] } = options;
-  if (typeof baseDir !== "string" || !baseDir.trim()) throw new TypeError("baseDir must be a nonempty path.");
-  if (!Array.isArray(dictionaries) || !dictionaries.length ||
-      dictionaries.some((entry) => typeof entry !== "string" || !entry.trim())) {
+export function prepareDictionaries(options, cwd) {
+  const { dictionaries = ["@cspell/dict-en_us"], baseDir = cwd } = options;
+  if (!baseDir.trim()) throw new TypeError("baseDir must be a nonempty path.");
+  if (dictionaries.some((entry) => !entry.trim())) {
     throw new TypeError("dictionaries must be a nonempty array of package names or .txt paths.");
   }
-  if (!Array.isArray(words)) throw new TypeError("words must be an array.");
-  const vocabulary = new Set(words.map((word) => requireWord(word, "words")));
-  const directory = resolve(baseDir);
+  const vocabulary = new Set();
+  const directory = resolve(cwd, baseDir);
   const consumerRequire = createRequire(resolve(directory, "package.json"));
-  const loaded = await Promise.all(dictionaries.map(async (entry) => {
+  const loaded = dictionaries.flatMap((entry) => {
     if (entry.endsWith(".txt")) {
       const filename = localPath(entry, directory);
-      const text = await readFile(filename, "utf8");
+      const text = readFileSync(filename, "utf8");
       for (const [index, line] of text.replace(/^\uFEFF/u, "").split(/\r?\n/u).entries()) {
         const word = line.trim();
         if (word && !word.startsWith("#")) vocabulary.add(requireWord(word, `${filename}:${index + 1}`));
       }
-      return undefined;
+      return [];
     }
     if (!packageName.test(entry)) throw new TypeError(`Unsupported dictionary: ${entry}.`);
     if (options.dictionaries === undefined) return packageDictionary(bundledRequire.resolve(entry));
@@ -121,13 +114,12 @@ export async function prepareDictionaries(options) {
     }
     if (!filename.endsWith(".json")) throw new TypeError(`Dictionary packages must export JSON: ${entry}.`);
     return packageDictionary(filename);
-  }));
-  const dictionariesToCheck = loaded.filter(Boolean);
+  });
   return {
     has(word) {
       const normalized = word.replaceAll("’", "'");
       return vocabulary.has(normalized) ||
-        dictionariesToCheck.some((dictionary) => dictionary.has(normalized, { ignoreCase: false }));
+        loaded.some((dictionary) => dictionary.has(normalized, { ignoreCase: false }));
     },
   };
 }

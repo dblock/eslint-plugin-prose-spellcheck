@@ -1,4 +1,13 @@
 [
+  { "name": "Default plugin needs no options or factory", "file": "misspellings.md", "omitOptions": true, "reports": [
+    { "word": "helo", "source": "helo" }, { "word": "wrng", "source": "wrng" }
+  ] },
+  { "name": "Vocabulary resolves from ESLint cwd without baseDir", "file": "custom.md", "useCwd": true,
+    "options": { "dictionaries": ["@cspell/dict-en_us", "./accepted.txt"] },
+    "reports": [{ "word": "zqxbrand", "source": "zqxbrand" }] },
+  { "name": "Relative baseDir resolves from ESLint cwd", "file": "custom.md",
+    "options": { "baseDir": ".", "dictionaries": ["@cspell/dict-en_us", "./accepted.txt"] },
+    "reports": [{ "word": "zqxbrand", "source": "zqxbrand" }] },
   { "name": "Valid prose, Unicode, apostrophes, and camel case", "file": "valid.md", "reports": [] },
   { "name": "Native CommonMark", "file": "valid.md", "language": "commonmark", "reports": [] },
   { "name": "Headings and paragraphs", "file": "misspellings.md", "reports": [
@@ -11,9 +20,9 @@
   { "name": "File URL vocabulary", "file": "custom.md",
     "options": { "dictionaries": ["@cspell/dict-en_us", "$VOCABULARY_URL"] },
     "reports": [{ "word": "zqxbrand", "source": "zqxbrand" }] },
-  { "name": "Inline vocabulary", "file": "custom.md",
+  { "name": "Inline words option is rejected", "file": "custom.md",
     "options": { "words": ["Zqxbrand", "ZqxbrandTool"] },
-    "reports": [{ "word": "zqxbrand", "source": "zqxbrand" }] },
+    "error": "Unexpected property.*words" },
   { "name": "Dictionary replacement", "file": "replacement.md",
     "options": { "dictionaries": ["./accepted.txt"] },
     "reports": [{ "word": "hello", "source": "hello" }] },
@@ -40,7 +49,8 @@
     { "word": "wrng", "source": "wr~~ng", "occurrence": 2 }
   ] },
   { "name": "CommonMark image labels retain literal GFM delimiters", "file": "image-dialects.md", "language": "commonmark",
-    "options": { "words": ["wor", "wr", "ng"] }, "reports": [] },
+    "options": { "dictionaries": ["@cspell/dict-en_us", "./commonmark.txt"] },
+    "files": { "commonmark.txt": "wor\nwr\nng\n" }, "reports": [] },
   { "name": "Table cells and visible link labels", "file": "table.md", "reports": [
     { "word": "helo", "source": "helo" },
     { "word": "wrng", "source": "wrng" }
@@ -87,7 +97,7 @@
     "options": { "dictionaries": ["@cspell/dict-en_us", "@cspell/dict-es-es"] }, "reports": [] },
   { "name": "Explicit software terminology", "file": "software.md",
     "options": { "dictionaries": ["@cspell/dict-en_us", "@cspell/dict-software-terms"] }, "reports": [] },
-  { "name": "Custom namespace", "file": "misspellings.md", "namespace": "words", "reports": [
+  { "name": "Custom namespace", "file": "misspellings.md", "namespace": "proseSpellcheck", "reports": [
     { "word": "helo", "source": "helo" },
     { "word": "wrng", "source": "wrng" }
   ] },
@@ -97,13 +107,62 @@
       "dictionaryDefinitions": [{ "name": "local", "path": "words.txt", "type": "W" }],
       "import": ["https://example.invalid/must-not-be-loaded.json"]
     }, "files": { "words.txt": "fixturelexicon\n" } }, "reports": [] },
-  { "name": "Options must be an object", "options": null, "error": "options must be an object" },
-  { "name": "Unknown option", "options": { "locale": "en" }, "error": "Unknown spellchecker option" },
-  { "name": "Invalid base directory", "options": { "baseDir": "" }, "error": "baseDir must be" },
-  { "name": "Empty dictionary selection", "options": { "dictionaries": [] }, "error": "dictionaries must be" },
-  { "name": "Invalid dictionary entry", "options": { "dictionaries": [7] }, "error": "dictionaries must be" },
-  { "name": "Invalid words option", "options": { "words": true }, "error": "words must be an array" },
-  { "name": "Vocabulary rejects phrases", "options": { "words": ["two words"] }, "error": "Invalid vocabulary word" },
+  { "name": "Word-list package ignores comments and splits whitespace", "file": "fixture-dictionary.md",
+    "options": { "dictionaries": ["@prose-test/dictionary"] },
+    "dictionaryPackage": { "config": {
+      "dictionaryDefinitions": [{ "name": "local", "path": "words.txt", "type": "W" }]
+    }, "files": { "words.txt": "otherword fixturelexicon # zqxcomment\n" } }, "reports": [] },
+  { "name": "Legacy package splits punctuation without checking comments", "file": "fixture-dictionary.md",
+    "options": { "dictionaries": ["@prose-test/dictionary"] },
+    "dictionaryPackage": { "config": {
+      "dictionaryDefinitions": [{ "name": "local", "path": "words.txt", "type": "C" }]
+    }, "files": { "words.txt": "otherword,fixturelexicon # zqxcomment\n" } }, "reports": [] },
+  { "name": "Simple package honors dictionary replacement mappings", "file": "fixture-dictionary.md",
+    "options": { "dictionaries": ["@prose-test/dictionary"] },
+    "dictionaryPackage": { "config": {
+      "dictionaryDefinitions": [{ "name": "local", "path": "words.txt", "type": "S",
+        "repMap": [["x", "k"]] }]
+    }, "files": { "words.txt": "fixturelekicon\n" } }, "reports": [] },
+  { "name": "Package definitions retain forbidden-word collection semantics", "file": "fixture-dictionary.md",
+    "options": { "dictionaries": ["@prose-test/dictionary"] },
+    "dictionaryPackage": { "config": {
+      "dictionaryDefinitions": [
+        { "name": "normal", "path": "words.txt" }, { "name": "forbidden", "path": "forbidden.txt" }
+      ]
+    }, "files": { "words.txt": "fixturelexicon\n", "forbidden.txt": "!fixturelexicon\n" } },
+    "reports": [{ "word": "fixturelexicon", "source": "fixturelexicon" }] },
+  { "name": "Flag-word definitions retain collection semantics", "file": "fixture-dictionary.md",
+    "options": { "dictionaries": ["@prose-test/dictionary"] },
+    "dictionaryPackage": { "config": {
+      "dictionaryDefinitions": [
+        { "name": "normal", "path": "words.txt" },
+        { "name": "flags", "path": "flags.txt", "kind": "flag-words" }
+      ]
+    }, "files": { "words.txt": "fixturelexicon\n", "flags.txt": "fixturelexicon\n" } },
+    "reports": [{ "word": "fixturelexicon", "source": "fixturelexicon" }] },
+  { "name": "Ignore-word definitions override package forbidden words", "file": "fixture-dictionary.md",
+    "options": { "dictionaries": ["@prose-test/dictionary"] },
+    "dictionaryPackage": { "config": {
+      "dictionaryDefinitions": [
+        { "name": "ignored", "path": "words.txt", "kind": "ignore-words" },
+        { "name": "flags", "path": "flags.txt", "kind": "flag-words" }
+      ]
+    }, "files": { "words.txt": "fixturelexicon\n", "flags.txt": "fixturelexicon\n" } }, "reports": [] },
+  { "name": "Suggestion definitions do not silently accept candidates", "file": "fixture-dictionary.md",
+    "options": { "dictionaries": ["@prose-test/dictionary"] },
+    "dictionaryPackage": { "config": {
+      "dictionaryDefinitions": [{ "name": "suggested", "path": "words.txt", "kind": "suggest-words" }]
+    }, "files": { "words.txt": "fixturelexicon\n" } },
+    "reports": [{ "word": "fixturelexicon", "source": "fixturelexicon" }] },
+  { "name": "Options must be an object", "options": null, "error": "should be object" },
+  { "name": "Unknown option", "options": { "locale": "en" }, "error": "Unexpected property.*locale" },
+  { "name": "Invalid base directory", "options": { "baseDir": "" }, "error": "shorter than 1" },
+  { "name": "Empty dictionary selection", "options": { "dictionaries": [] }, "error": "fewer than 1" },
+  { "name": "Invalid dictionary entry", "options": { "dictionaries": [7] }, "error": "should be string" },
+  { "name": "Whitespace base directory", "options": { "baseDir": " " }, "error": "baseDir must be" },
+  { "name": "Whitespace dictionary entry", "options": { "dictionaries": [" "] }, "error": "dictionaries must be" },
+  { "name": "Vocabulary rejects phrases", "options": { "dictionaries": ["./bad.txt"] },
+    "files": { "bad.txt": "two words\n" }, "error": "Invalid vocabulary word" },
   { "name": "Vocabulary rejects dictionary control syntax",
     "options": { "dictionaries": ["./bad.txt"] }, "files": { "bad.txt": "!forbidden\n" }, "error": "Invalid vocabulary word" },
   { "name": "Missing vocabulary", "options": { "dictionaries": ["./missing.txt"] }, "error": "ENOENT" },
@@ -138,6 +197,12 @@
   { "name": "Corrupt dictionary data", "options": { "dictionaries": ["@prose-test/dictionary"] },
     "dictionaryPackage": { "config": { "dictionaryDefinitions": [{ "name": "local", "path": "words.txt.gz" }] },
       "files": { "words.txt.gz": { "base64": "H4sIAAAAAAAAAw==" } } }, "error": "Cannot load dictionaries" },
-  { "name": "Rule options are rejected rather than silently ignored",
-    "rules": { "prose-spellcheck/spellchecker": ["error", { "words": ["helo"] }] }, "error": "more than 0 items" }
+  { "name": "Rule-level vocabulary is accepted", "file": "misspellings.md",
+    "files": { "extra.txt": "helo\n" },
+    "rules": { "prose-spellcheck/spellcheck": ["error", {
+      "dictionaries": ["@cspell/dict-en_us", "./extra.txt"]
+    }] },
+    "reports": [{ "word": "wrng", "source": "wrng" }] },
+  { "name": "Extra rule option objects are rejected",
+    "rules": { "prose-spellcheck/spellcheck": ["error", {}, {}] }, "error": "more than 1 items" }
 ]

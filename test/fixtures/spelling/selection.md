@@ -7,7 +7,7 @@ www.urltyppo.invalid and <ftp://urltyppo.invalid> and <mailtyppo@example.invalid
 `codetyppo`
 
 ```js
-// <!-- eslint-disable prose-spellcheck/spellchecker -->
+// <!-- eslint-disable prose-spellcheck/spellcheck -->
 const fencedtyppo = "moretyppo";
 ```
 

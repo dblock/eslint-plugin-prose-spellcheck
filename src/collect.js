@@ -13,7 +13,7 @@ export async function collectWords(patterns, options) {
     const rules = new Set(Object.entries(config.rules).filter(([id, severity]) => {
       const slash = id.lastIndexOf("/");
       const plugin = config.plugins[id.slice(0, slash)];
-      return id.slice(slash + 1) === "spellchecker" &&
+      return id.slice(slash + 1) === "spellcheck" &&
         plugin?.meta?.name === packageJson.name && severity[0] !== 0;
     }).map(([id]) => id));
     if (!rules.size) continue;

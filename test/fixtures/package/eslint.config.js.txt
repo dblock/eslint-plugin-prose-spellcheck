@@ -1,9 +1,8 @@
 import markdown from "@eslint/markdown";
-import createPlugin from "eslint-plugin-prose-spellcheck";
+import plugin from "eslint-plugin-prose-spellcheck";
 import fixture from "./fixture.json" with { type: "json" };
 
 const namespace = fixture.namespace ?? "prose-spellcheck";
-const plugin = await createPlugin(fixture.options);
 
 export default [
   { ignores: ["ignored.md"] },
@@ -13,7 +12,11 @@ export default [
     language: `markdown/${fixture.language ?? "gfm"}`,
     languageOptions: { frontmatter: "yaml" },
     rules: {
-      ...(!fixture.noRule ? { [`${namespace}/spellchecker`]: fixture.severity ?? "error" } : {}),
+      ...(!fixture.noRule ? {
+        [`${namespace}/spellcheck`]: fixture.omitOptions
+          ? fixture.severity ?? "error"
+          : [fixture.severity ?? "error", fixture.options],
+      } : {}),
       ...fixture.rules,
     },
   },
