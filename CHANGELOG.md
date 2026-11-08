@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.1.3 (Next)
+
+- Your contribution here.
+
 ## 0.1.2 (2026/11/08)
 
 - [#9](https://github.com/dblock/eslint-plugin-prose-spellcheck/pull/9): Confirm registry publication after next-version preparation and tolerate visibility timeouts - [@dblock](https://github.com/dblock).
