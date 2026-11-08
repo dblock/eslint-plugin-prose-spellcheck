@@ -30,6 +30,8 @@ npm trust github eslint-plugin-prose-spellcheck \
 
 A new publisher must complete its first successful publication within two days or expire. Verifying configuration does not prove actual OIDC publication. Verify the connection remains valid before an authorized dispatch; do not publish merely to prevent expiration.
 
+Trusted publication is now verified: npm 0.1.1 was published by the configured GitHub Actions publisher on 2026/11/08. Its provenance identifies this repository, `release.yml`, `master`, and [run 42523899044](https://github.com/dblock/eslint-plugin-prose-spellcheck/actions/runs/42523899044); registry bytes match the validated archive and `v0.1.1` release commit. The current connection has satisfied its first-publication requirement. The run failed afterward because registry visibility lagged publication by about 77 seconds; the missing GitHub Release was recovered from the existing tag without republishing.
+
 The GitHub `release` environment is restricted to the `master` branch, with no required reviewers or allowed tag patterns. The repository-specific approved no-App exception removes only the PR requirement, allowing all writers to push directly. Force-push and deletion protections remain active without bypass actors; ordinary development still requires PRs. Repository writers can dispatch releases; adding required environment reviewers needs separate approval.
 
 The GitHub-hosted Ubuntu workflow pins Node.js 26.13.0 and npm 12.2.2, grants `contents: write` and `id-token: write`, and uses the built-in `GITHUB_TOKEN` for Git and GitHub Releases. There is no stored npm token or `NODE_AUTH_TOKEN`. npm automatically supplies provenance for qualifying public packages and repositories. After the first trusted publication, inspect its provenance and consider tightening npm publishing-access settings only with separate authorization.
@@ -69,9 +71,11 @@ The hooks pack once to `.release/package.tgz`, retain its SHA-512 checksum and r
 
 Changes are limited to package version fields, CHANGELOG, and README. Immediately before publication, hooks reject changed metadata, a changed archive, or an advanced remote `master`. npm 11 and 12 pack/view JSON formats are supported and tested.
 
-Release-it publishes the retained tarball through OIDC, then commits the metadata, creates an annotated version tag, and atomically pushes the matching commit/tag. Before creating the GitHub Release, hooks verify the remote branch/tag match the release commit and the registry version/integrity match the archive. The GitHub Release includes the archive and checksum.
+Release-it publishes the retained tarball through OIDC, then commits the metadata, creates an annotated version tag, and atomically pushes the matching commit/tag. Before creating the GitHub Release, hooks verify the remote branch/tag match the release commit. The GitHub Release includes the validated archive and checksum; registry confirmation is not a prerequisite.
 
 After successful publication and GitHub Release creation, a second release-it run increments patch, adds the Next section and placeholder, validates source and packed consumers, and commits/pushes the next development metadata. README stays pinned to the released version. This second run does not publish, tag, or create another GitHub Release.
+
+Only afterward does the workflow confirm the released version and archive integrity against npm, using fresh online metadata. It retries missing-version `E404` responses with up to 36 lookups and five-second waits (roughly three minutes plus request time). Exhausting this visibility wait does not fail the workflow or block development: it records that the release could not be verified in the job summary and retained `.release/verification.txt`. Check npm again later; never republish merely because confirmation timed out. Authentication, network, malformed metadata, version mismatch, and integrity mismatch errors remain failures.
 
 ## Failure Recovery
 

@@ -9,6 +9,7 @@ import test from "node:test";
 import { fileURLToPath, URL } from "node:url";
 import {
   developmentChangelog, nextVersion, npmRecord, registryVersion, releaseChangelog, releaseStep, stableVersion, validateMetadata,
+  waitForRegistryVersion,
 } from "../scripts/release.js";
 
 const cases = JSON.parse(await readFile(new URL("./fixtures/release/changelog.json", import.meta.url), "utf8"));
@@ -25,6 +26,106 @@ for (const fixture of cases) {
     }
   });
 }
+
+test("registry verification tolerates delayed publication with fresh, spaced lookups", async () => {
+  const missing = Object.assign(new Error("missing"), { stdout: '{"error":{"code":"E404"}}' });
+  const published = { version: "0.1.2", "dist.integrity": "sha512-example" };
+  let lookups = 0;
+  const waits = [];
+  const result = await waitForRegistryVersion("example", "0.1.2", {
+    execute: (program, args) => {
+      assert.equal(program, "npm");
+      assert.ok(args.includes("--prefer-online"));
+      if (++lookups < 3) throw missing;
+      return JSON.stringify([published]);
+    },
+    wait: async (milliseconds) => { waits.push(milliseconds); },
+  });
+  assert.deepEqual(result, published);
+  assert.equal(lookups, 3);
+  assert.equal(waits.length, 2);
+  assert.ok(waits.every((milliseconds) => milliseconds > 0));
+});
+
+test("registry visibility timeout is nonfatal and other lookup errors are not retried", async () => {
+  let lookups = 0;
+  assert.equal(await waitForRegistryVersion("example", "0.1.2", {
+    execute: () => {
+      assert.ok(++lookups < 100, "Do not retry indefinitely.");
+      throw Object.assign(new Error("missing"), { stdout: '{"error":{"code":"E404"}}' });
+    },
+    wait: async () => {},
+  }), null);
+  assert.ok(lookups > 1);
+  for (const stdout of ['{"error":{"code":"E401"}}', '{"error":{"code":"E500"}}', "network failure"]) {
+    lookups = 0;
+    await assert.rejects(waitForRegistryVersion("example", "0.1.2", {
+      execute: () => {
+        lookups++;
+        throw Object.assign(new Error("failed"), { stdout });
+      },
+      wait: async () => { assert.fail("Do not wait on authentication or network errors."); },
+    }), /failed/u);
+    assert.equal(lookups, 1);
+  }
+});
+
+test("final registry verification records timeout warnings and checks the released version after development advances", async () => {
+  const bytes = "validated archive";
+  const published = {
+    version: "0.1.1", "dist.integrity": `sha512-${createHash("sha512").update(bytes).digest("base64")}`,
+  };
+  for (const fixture of [
+    { record: null, message: /could not be verified.*do not republish/u, summary: true },
+    { record: published, message: /Verified npm release 0\.1\.1/u },
+    { record: { ...published, version: "0.1.2" }, error: /published version/u },
+    { record: { ...published, "dist.integrity": "sha512-wrong" }, error: /artifact must match/u },
+  ]) {
+    const directory = await mkdtemp(join(tmpdir(), "prose-registry-verification-"));
+    const cwd = process.cwd();
+    const summary = process.env.GITHUB_STEP_SUMMARY;
+    try {
+      process.chdir(directory);
+      await mkdir(".release");
+      await writeFile("package.json", '{"name":"example","version":"0.1.2"}');
+      await writeFile("CHANGELOG.md", cases[0].input);
+      await writeFile(".release/package.tgz", bytes);
+      if (fixture.summary) {
+        process.env.GITHUB_STEP_SUMMARY = join(directory, "summary.md");
+        await writeFile("summary.md", "Previous step summary.\n");
+      } else {
+        delete process.env.GITHUB_STEP_SUMMARY;
+      }
+      const verify = () => releaseStep("verify", "0.1.1", {
+        execute: (program) => {
+          assert.equal(program, "npm", "Registry confirmation must not compare the next commit to the release tag.");
+          if (fixture.record === null) {
+            throw Object.assign(new Error("missing"), { stdout: '{"error":{"code":"E404"}}' });
+          }
+          return JSON.stringify([fixture.record]);
+        },
+        wait: async () => {},
+      });
+      if (fixture.error) {
+        await assert.rejects(verify(), fixture.error);
+        await assert.rejects(readFile(".release/verification.txt"), { code: "ENOENT" });
+      } else {
+        await verify();
+        assert.match(await readFile(".release/verification.txt", "utf8"), fixture.message);
+        if (fixture.summary) {
+          const text = await readFile("summary.md", "utf8");
+          assert.ok(text.startsWith("Previous step summary.\n"));
+          assert.match(text, fixture.message);
+        }
+      }
+    } finally {
+      if (summary === undefined) delete process.env.GITHUB_STEP_SUMMARY;
+      else process.env.GITHUB_STEP_SUMMARY = summary;
+      process.chdir(cwd);
+      await rm(directory, { recursive: true, force: true });
+    }
+  }
+});
 
 test("release versions reject shell syntax, unsupported versions, and overflow", () => {
   for (const version of ["v1.0.0", "1.0.0-beta.1", "01.0.0", "1.0.0; echo bad", "1.0.9007199254740992"]) {
@@ -148,7 +249,7 @@ for (const mode of ["checked-in version", "version override"]) {
       await writeFile(join(root, "CHANGELOG.md"), cases[0].input);
       const config = JSON.parse(await readFile(new URL("../.release-it.json", import.meta.url), "utf8"));
       // Verify published refs/integrity without creating a real GitHub Release.
-      config.hooks["after:release"] = [config.hooks["before:github:release"], config.hooks["after:release"]];
+      config.hooks["after:release"] = [config.hooks["before:github:release"], ...config.hooks["after:release"]];
       config.github = false;
       await writeFile(join(root, ".release-it.json"), JSON.stringify(config));
       await mkdir(join(root, "scripts"));
@@ -174,6 +275,9 @@ if (args[0] === "view") {
     console.log('{"error":{"code":"E404"}}');
     process.exit(1);
   }
+  assert.ok(existsSync(".release/next-tested"), "Prepare and validate development before registry confirmation.");
+  assert.notEqual(JSON.parse(readFileSync("package.json", "utf8")).version,
+    readFileSync(".release/published", "utf8"));
   console.log(JSON.stringify([{version:readFileSync(".release/published", "utf8"),
     "dist.integrity":"sha512-" + createHash("sha512").update("validated artifact").digest("base64")}]));
 } else if (args[0] === "pack") {
@@ -190,6 +294,7 @@ if (args[0] === "view") {
     writeFileSync(".release/tested", "tested");
   } else {
     assert.ok(existsSync(".release/published"), "Validate the next version after publication.");
+    writeFileSync(".release/next-tested", "tested");
   }
 } else if (args[0] === "publish") {
   assert.equal(args[1], ".release/package.tgz");
@@ -210,6 +315,7 @@ if (args[0] === "view") {
         env: {
           ...process.env, GITHUB_ACTIONS: "true", GITHUB_EVENT_NAME: "workflow_dispatch", GITHUB_REF: "refs/heads/master",
           RELEASE_VERSION: mode === "version override" ? released : "", PROSE_SPELLCHECK_PACKAGE_ARCHIVE: "",
+          GITHUB_STEP_SUMMARY: join(root, ".release/summary.md"),
           PATH: `${bin}${delimiter}${process.env.PATH}`,
         },
       });
@@ -223,6 +329,7 @@ if (args[0] === "view") {
       assert.equal(git("tag", "--list").trim(), `v${released}`);
       assert.match(git("log", "-2", "--format=%B"), /Co-authored-by: Copilot/u);
       assert.equal(git("status", "--porcelain"), "");
+      assert.match(await readFile(join(root, ".release/verification.txt"), "utf8"), /Verified npm release/u);
     } finally {
       await rm(directory, { recursive: true, force: true });
     }

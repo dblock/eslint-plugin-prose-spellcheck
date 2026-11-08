@@ -25,7 +25,10 @@
     "before:init": "node scripts/release.js check",
     "after:bump": "node scripts/release.js prepare ${version}",
     "before:npm:release": "node scripts/release.js ready ${version}",
-    "before:github:release": "node scripts/release.js verify ${version}",
-    "after:release": "node scripts/release.js next ${version}"
+    "before:github:release": "node scripts/release.js refs ${version}",
+    "after:release": [
+      "node scripts/release.js next ${version}",
+      "node scripts/release.js verify ${version}"
+    ]
   }
 }
