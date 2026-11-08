@@ -2,13 +2,13 @@
 
 ## Status
 
-These instructions are provisional. The package is an unpublished scaffold with no spellchecking or collection behavior. There is no release workflow, configured trusted publisher, or authorization to publish. Do not release the scaffold as a working plugin.
+These instructions are provisional. The implementation is unreleased. There is no release workflow, configured trusted publisher, or authorization to publish.
 
 ## Preparation
 
-Obtain explicit approval for the version and release procedure. Synchronize package.json, package-lock.json, and the changelog; replace the Next heading with `## <version> (YYYY/MM/DD)` and remove its placeholder when preparing an actual release. Follow [AGENTS.md](AGENTS.md)'s version policy and document breaking changes and migration instructions. Keep ordinary development and release preparation PR-based unless an exception is explicitly approved.
+Obtain explicit approval for the version and release procedure. Synchronize package.json, package-lock.json, and the changelog; replace the Next heading with `## <version> (YYYY/MM/DD)` and remove its placeholder when preparing an actual release. Follow the version policy in [AGENTS.md](AGENTS.md) and document breaking changes and migration instructions. Keep ordinary development and release preparation PR-based unless an exception is explicitly approved.
 
-Run `npm ci`, `npm run test:coverage`, `npm run lint`, and `npm run test:package` on the intended revision and verify CI. Create the exact candidate with `npm pack --json`, inspect its contents, and install that same archive in a fresh consumer to verify public API, native ESLint CLI behavior, and the collection executable once implemented. Do not rebuild a different artifact between approval and publication.
+Run `npm ci`, `npm run test:coverage`, `npm run lint`, and `npm run test:package` on the intended revision and verify CI. Create the exact candidate with `npm pack --json`, inspect its contents, and install that same archive in a fresh consumer to verify public API, native ESLint CLI behavior, and the collection executable. Do not rebuild a different artifact between approval and publication.
 
 ## Authentication and Publication
 
