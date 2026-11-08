@@ -1,3 +1,5 @@
+<img src="assets/logo.png" alt="Pen-and-ink finch perched on a dictionary beside a pencil" width="160">
+
 # eslint-plugin-prose-spellcheck
 
 [![Test](https://github.com/dblock/eslint-plugin-prose-spellcheck/actions/workflows/test.yml/badge.svg)](https://github.com/dblock/eslint-plugin-prose-spellcheck/actions/workflows/test.yml) [![Lint](https://github.com/dblock/eslint-plugin-prose-spellcheck/actions/workflows/lint.yml/badge.svg)](https://github.com/dblock/eslint-plugin-prose-spellcheck/actions/workflows/lint.yml) [![Package](https://github.com/dblock/eslint-plugin-prose-spellcheck/actions/workflows/package.yml/badge.svg)](https://github.com/dblock/eslint-plugin-prose-spellcheck/actions/workflows/package.yml) [![Coverage](https://coveralls.io/repos/github/dblock/eslint-plugin-prose-spellcheck/badge.svg?branch=master)](https://coveralls.io/github/dblock/eslint-plugin-prose-spellcheck?branch=master)

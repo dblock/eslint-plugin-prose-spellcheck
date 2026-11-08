@@ -6,6 +6,8 @@
   "LICENSE",
   "README.md",
   "RELEASING.md",
+  "assets/logo-source.png",
+  "assets/logo.png",
   "package.json",
   "src/cli.js",
   "src/collect.js",
