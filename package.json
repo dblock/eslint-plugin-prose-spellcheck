@@ -1,6 +1,6 @@
 {
   "name": "eslint-plugin-prose-spellcheck",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Offline Markdown prose spellchecking for native ESLint Markdown, powered by CSpell.",
   "type": "module",
   "exports": {
@@ -24,7 +24,7 @@
   },
   "scripts": {
     "test": "node --test",
-    "test:coverage": "c8 --all --include=\"src/**/*.js\" --include=\"scripts/documentation-plugin.js\" --include=\"scripts/check-workflow-names.js\" --reporter=text --reporter=lcov node --test",
+    "test:coverage": "c8 --all --include=\"src/**/*.js\" --include=\"scripts/check-workflow-names.js\" --reporter=text --reporter=lcov node --test",
     "lint": "eslint . && eslint --config eslint.config-code-blocks.js \"**/*.md\" && node scripts/check-workflow-names.js",
     "test:package": "node scripts/check-package.js"
   },
@@ -50,6 +50,7 @@
     "c8": "12.0.0",
     "eslint": "10.14.0",
     "eslint-plugin-markdown-preferences": "0.43.0",
+    "eslint-plugin-markdown-preferences-paragraph": "0.1.0",
     "eslint-plugin-yml": "3.10.0",
     "title-case": "4.3.2",
     "yaml": "2.9.1"

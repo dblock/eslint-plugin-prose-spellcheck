@@ -1,8 +1,8 @@
 import js from "@eslint/js";
 import markdown from "@eslint/markdown";
 import preferences from "eslint-plugin-markdown-preferences";
+import paragraph from "eslint-plugin-markdown-preferences-paragraph";
 import yml from "eslint-plugin-yml";
-import documentation from "./scripts/documentation-plugin.js";
 import proseSpellcheck from "./src/index.js";
 
 export default [
@@ -14,7 +14,7 @@ export default [
     plugins: {
       markdown,
       "markdown-preferences": preferences,
-      "project-documentation": documentation,
+      "markdown-preferences-paragraph": paragraph,
       "prose-spellcheck": proseSpellcheck,
     },
     language: "markdown/gfm",
@@ -38,7 +38,7 @@ export default [
         ],
       }],
       "markdown-preferences/no-heading-trailing-punctuation": "error",
-      "project-documentation/single-line-paragraphs": "error",
+      "markdown-preferences-paragraph/wrap": ["error", { width: "nowrap" }],
       "prose-spellcheck/spellcheck": ["error", {
         dictionaries: ["@cspell/dict-en_us", "@cspell/dict-software-terms", "./.spellcheck.txt"],
         baseDir: import.meta.dirname,

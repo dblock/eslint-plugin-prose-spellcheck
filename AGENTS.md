@@ -12,7 +12,7 @@ Only implement approved first-version scope. Do not add spelling fixes, suggesti
 
 ## Validation and Documentation
 
-Run `npm test` or `npm run test:coverage`, plus `npm run lint`, locally before every development push. Run `npm run test:package` before committing when packaging, dependencies, public entry points, or consumer configuration changes. Final results can serve the push only if tested content is unchanged. Focused runtime tests use `node --test test/spelling.test.js test/collect.test.js`; documentation helpers use `node --test test/documentation.test.js test/workflow-names.test.js`. Integration checks must install the actual packed artifact and invoke real ESLint and the installed collection executable.
+Run `npm test` or `npm run test:coverage`, plus `npm run lint`, locally before every development push. Run `npm run test:package` before committing when packaging, dependencies, public entry points, or consumer configuration changes. Final results can serve the push only if tested content is unchanged. Focused runtime tests use `node --test test/spelling.test.js test/collect.test.js`; workflow checks use `node --test test/workflow-names.test.js`. Integration checks must install the actual packed artifact and invoke real ESLint and the installed collection executable.
 
 Aim for coverage close to 100% of owned runtime lines and branches using meaningful behavior and error fixtures. `npm run test:coverage` includes subprocesses; explain remaining gaps without excluding real implementation. Maintain separate Test, Lint, and Package workflows, least-privilege permissions, explicit inline `matrix.entry` combinations without include/exclude, and Coveralls.
 
