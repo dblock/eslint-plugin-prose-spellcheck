@@ -17,6 +17,7 @@ frontmatter
 mdast
 micromark
 Node.js
+PNG
 prose-spellcheck
 README.md
 RELEASING.md

@@ -2,7 +2,7 @@
 
 ## Status and Purpose
 
-The unreleased implementation provides an asynchronously prepared plugin and a vocabulary collection executable. No publication, merge, release tag, or artwork is authorized by these instructions.
+The unreleased implementation provides an asynchronously prepared plugin and a vocabulary collection executable. No publication, merge, or release tag is authorized by these instructions.
 
 Provide one native ESLint Markdown rule, `prose-spellcheck/spellchecker`, and a read-only vocabulary collection command. Use ESLint's file selection, configuration, severity, ignore rules, suppression comments, and diagnostic formats rather than introducing another documentation linter.
 
@@ -55,3 +55,21 @@ ESLint and `@eslint/markdown` are peers, with the tested stable versions install
 Data-driven files test public exports and the actual ESLint CLI and collection executable from an installed tarball. Cover valid prose, misspellings, vocabulary, contractions, compounds, headings, links, images, exclusions, suppression, emoji, escapes, entities, multiline containers, CRLF, missing final newline, configuration errors, dictionary-loading failures, and collection safety. Synthetic dictionary packages are created only in owned temporary consumers; installed CSpell dependencies are never patched. Near-total line and branch coverage is the goal, with uncovered paths explained rather than hidden.
 
 No JavaScript/TypeScript source spelling, plain-text language, standalone HTML, MDX, grammar checks, automatic corrections, suggestions, language detection, YAML value checking, vocabulary refresh, or automatic configuration editing is included in the first implementation.
+
+## Artwork
+
+The approved Dictionary Finch concept uses a natural pen-and-ink-style finch perched on an open dictionary, with a pencil resting on the pages. Recognizable feather structure, natural proportions, and an attentive pose replace the geometric mascot. The original illustration was generated using the GitHub Copilot image tool on behalf of @dblock and is covered by this project's MIT license. No reference images or copied artwork were supplied.
+
+`assets/logo-source.png` preserves the original generated image with transparency. `assets/logo.png` is the display asset, composed onto white so the ink stays readable on both light and dark pages. These are raster images, not editable vector paths. Preserve the original source when editing or regenerating. Keep the logo first in README at a display width of 160 pixels, with descriptive alternative text and blank lines before the project title and badges.
+
+Generation brief: create an original black-and-white pen-and-ink finch illustration, with authentic anatomy, layered wing and tail feathers, a short closed conical beak, slender gripping feet, and a small attentive eye. Perch the bird naturally on an open dictionary with a pencil resting diagonally on the pages. Use restrained hatching, confident contours, generous margins, and no readable lettering. Keep the silhouette recognizable at 160 pixels. Avoid human-like arms, eyebrows, smiles, oversized eyes, geometric badges, gradients, and colored backgrounds.
+
+After editing, inspect the full-size artwork and README rendering at 160 pixels on light and dark backgrounds for legibility and clipping. Use `magick` to regenerate the display asset from the retained source and produce optional review previews:
+
+```sh
+magick assets/logo-source.png -background white -alpha remove -alpha off -strip assets/logo.png
+magick assets/logo.png -resize 640x640 /tmp/prose-spellcheck-logo-full.png
+magick assets/logo.png -resize 160x160 /tmp/prose-spellcheck-logo-small.png
+```
+
+Run `npm run lint` and `npm run test:package` after artwork or README changes. Package validation verifies that the actual archive contains both PNG files alongside the README that references the display asset.

@@ -18,6 +18,8 @@ Aim for coverage close to 100% of owned runtime lines and branches using meaning
 
 Use ESLint-family documentation linting, not Markdownlint. Keep Markdown paragraphs on one source line and human-readable headings and YAML workflow/job/step names in title case; preserve proper names, acronyms, expressions, and identifiers. `npm run lint` includes embedded JavaScript, the tested YAML-aware name checker, and this plugin's own documentation spelling with reviewed `.spellcheck.txt` vocabulary. Exclude intentional failure fixtures rather than broadly suppressing diagnostics. Preserve native ESLint's documented directive behavior inside Liquid; never mutate the host to hide it.
 
+Preserve the original Dictionary Finch source PNG, its display PNG, MIT provenance, and descriptive alternative text in the leading 160-pixel README image. Follow the artwork instructions in [DESIGN.md](DESIGN.md) and inspect full-size and small light/dark renderings after edits.
+
 ## Versions and Changelog
 
 Before the first release, keep the initial package version while completing unreleased functionality. After the first release, put version bumps in the same PR as the change. For features in `0.x`, increment minor and reset patch, such as `0.1.1` to `0.2.0`; for features in `1.x` and later, increment minor while preserving patch, such as `5.3.1` to `5.4.1`. Breaking changes are allowed in `0.x`: increment minor and reset patch without requesting a major bump. For breaking changes in `1.x` and later, ask before choosing a major bump. Document breaking behavior and migration guidance.
