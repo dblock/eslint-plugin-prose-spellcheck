@@ -4,58 +4,18 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: Optional stable version overriding the checked-in version.
+        description: Optional numeric release version overriding package.json.
         type: string
         required: false
 
 permissions:
-  contents: read
-
-concurrency:
-  group: release
-  cancel-in-progress: false
+  contents: write
+  id-token: write
 
 jobs:
   release:
-    name: Release npm Package
-    if: github.ref == 'refs/heads/master'
-    runs-on: ubuntu-latest
-    environment: release
-    permissions:
-      contents: write
-      id-token: write
-    steps:
-      - name: Check Out Release Source
-        uses: actions/checkout@v7.0.1
-        with:
-          ref: ${{ github.sha }}
-          fetch-depth: 0
-      - name: Set Up Node
-        uses: actions/setup-node@v7.1.0
-        with:
-          node-version-file: .nvmrc
-          package-manager-cache: false
-      - name: Set Up npm
-        run: npm install --global npm@12.2.2
-      - name: Install Dependencies
-        run: npm ci
-      - name: Configure Release Branch
-        run: |
-          git switch -c master
-          git branch --set-upstream-to=origin/master master
-          git config user.name 'github-actions[bot]'
-          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-      - name: Make Release
-        run: npm run release
-        env:
-          RELEASE_VERSION: ${{ inputs.version }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - name: Retain Release and Recovery Artifacts
-        if: always()
-        uses: actions/upload-artifact@v7.0.2
-        with:
-          name: release-${{ github.run_id }}-${{ github.run_attempt }}
-          path: .release/
-          include-hidden-files: true
-          if-no-files-found: ignore
-          retention-days: 14
+    uses: dblock/npm-package-release/.github/workflows/release.yml@v0.1.1
+    with:
+      version: ${{ inputs.version }}
+      node-version: '26.13.0'
+      npm-version: '12.2.2'

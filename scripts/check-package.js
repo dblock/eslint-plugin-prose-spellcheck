@@ -28,7 +28,7 @@ function runNpm(args, cwd) {
 
 try {
   assert.ok(process.argv.length <= 3, "Usage: npm run test:package -- [output-archive.tgz]");
-  let archive = process.env.PROSE_SPELLCHECK_PACKAGE_ARCHIVE;
+  let archive = process.env.PACKAGE_ARCHIVE;
   if (archive) {
     archive = resolve(root, archive);
   } else {
