@@ -4,9 +4,9 @@ Use **Actions > Release > Run workflow** on `master` only after explicit release
 
 ## Release Tooling
 
-`npm-package-release@0.1.1` replaces this project's copied release-it scripts. Keep the locked development dependency and `.github/workflows/release.yml` reference at the same version. The caller uses the upstream GitHub-hosted workflow with Node.js 26.13.0 and npm 12.2.2, manual dispatch only, the `release` environment, non-canceling release concurrency, and `contents: write` / `id-token: write`.
+`npm-package-release@0.2.0` replaces this project's copied release-it scripts. Keep the locked development dependency and `.github/workflows/release.yml` reference at the same version. The caller uses the upstream GitHub-hosted workflow with Node.js 26.13.0 and npm 12.2.2, manual dispatch only, the `release` environment, non-canceling release concurrency, and `contents: write` / `id-token: write`.
 
-`npr.config.js` retains the existing versioned Next changelog through `IntrideaChangelog`, updates only the README installation section to the released version, and connects source and packed-consumer validation. It does not choose versions from commit messages. See the upstream [usage](https://github.com/dblock/npm-package-release/blob/v0.1.1/docs/usage.md) and [recovery](https://github.com/dblock/npm-package-release/blob/v0.1.1/docs/recovery.md) instructions.
+`npr.config.js` retains the existing versioned Next changelog through `IntrideaChangelog`, updates only the README installation section to the released version, and connects source and packed-consumer validation. It does not choose versions from commit messages. See the upstream [usage](https://github.com/dblock/npm-package-release/blob/v0.2.0/docs/usage.md) and [recovery](https://github.com/dblock/npm-package-release/blob/v0.2.0/docs/recovery.md) instructions.
 
 ## Trusted Publishing
 
