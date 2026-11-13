@@ -14,7 +14,7 @@ permissions:
 
 jobs:
   release:
-    uses: dblock/npm-package-release/.github/workflows/release.yml@v0.1.1
+    uses: dblock/npm-package-release/.github/workflows/release.yml@v0.2.0
     with:
       version: ${{ inputs.version }}
       node-version: '26.13.0'
