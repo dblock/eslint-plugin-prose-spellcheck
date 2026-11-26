@@ -4,7 +4,7 @@ Read [CONTRIBUTING.md](CONTRIBUTING.md) and [DESIGN.md](DESIGN.md) before editin
 
 ## Implementation Invariants
 
-Runtime code belongs in `src/`, tests in `test/`, and data-driven inputs and expected diagnostics in `test/fixtures/`. Development-only lint and package helpers belong in `scripts/`. Support Node.js `^22.18.0 || >=24.0.0`, ESLint `^9.39.0 || ^10.0.0`, native `@eslint/markdown`, and public CSpell APIs. Verify latest stable tooling when selecting or updating dependencies, preserving runtime compatibility.
+Runtime code belongs in `src/`, tests in `test/`, and data-driven inputs and expected diagnostics in `test/fixtures/`. Development-only lint and package helpers belong in `scripts/`. Support Node.js `^22.18.0 || >=24.0.0`, ESLint `^9.39.0 || ^10.0.0`, native `@eslint/markdown` `^8.0.3 || ^9.0.0`, and public CSpell APIs. Verify latest stable tooling when selecting or updating dependencies, preserving runtime compatibility.
 
 Release tooling is development-only: keep `npm-package-release` and the reusable Release workflow pinned to the same version. Use the pinned `.nvmrc` baseline with npm 12.2.2 for release validation; runtime support is unchanged. Minimum-runtime compatibility jobs relax engine checks only while installing development tools; packed consumers retain strict engines and peers.
 
