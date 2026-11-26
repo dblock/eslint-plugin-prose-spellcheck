@@ -1,9 +1,10 @@
 # Changelog
 
-## 0.1.3 (Next)
+## 0.2.0 (Next)
 
 - [#11](https://github.com/dblock/eslint-plugin-prose-spellcheck/pull/11): Replace copied release scripts with npm-package-release and its reusable workflow - [@dblock](https://github.com/dblock).
 - [#12](https://github.com/dblock/eslint-plugin-prose-spellcheck/pull/12): Upgrade npm-package-release and its reusable workflow to 0.2.0 - [@dblock](https://github.com/dblock).
+- [#13](https://github.com/dblock/eslint-plugin-prose-spellcheck/pull/13): Added support for `@eslint/markdown` 9 - [@dblock](https://github.com/dblock).
 - Your contribution here.
 
 ## 0.1.2 (2026/11/08)

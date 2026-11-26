@@ -7,6 +7,7 @@ import { basename, join, resolve } from "node:path";
 import process from "node:process";
 import { fileURLToPath, URL } from "node:url";
 import { ESLint } from "eslint";
+import markdown from "@eslint/markdown";
 import { collectionCases, fixtureDiagnostics, prepareCollection, prepareFixture, spellingCases, spellingDiagnostics } from "./spelling-fixtures.js";
 
 const root = fileURLToPath(new URL("../", import.meta.url));
@@ -53,12 +54,18 @@ try {
   runNpm([
     "install", "--ignore-scripts", "--no-audit", "--no-fund",
     "--engine-strict", "--strict-peer-deps", "--save-exact", archive, `eslint@${ESLint.version}`,
+    `@eslint/markdown@${markdown.meta.version}`,
   ], temporary);
   const installedESLint = runNode([
     "--input-type=module", "-e", 'import { ESLint } from "eslint"; process.stdout.write(ESLint.version);',
   ]);
   assert.equal(installedESLint.status, 0, installedESLint.stderr);
   assert.equal(installedESLint.stdout, ESLint.version);
+  const installedMarkdown = runNode([
+    "--input-type=module", "-e", 'import markdown from "@eslint/markdown"; process.stdout.write(markdown.meta.version);',
+  ]);
+  assert.equal(installedMarkdown.status, 0, installedMarkdown.stderr);
+  assert.equal(installedMarkdown.stdout, markdown.meta.version);
 
   for (const fixture of spellingCases) {
     const text = await prepareFixture(fixture, temporary);
@@ -107,7 +114,7 @@ try {
   if (process.argv[2]) {
     await copyFile(archive, resolve(root, process.argv[2]), constants.COPYFILE_EXCL);
   }
-  process.stdout.write(`Validated ${basename(archive)} with ESLint ${ESLint.version}: ${entries.length} archive entries, ${spellingCases.length} API/ESLint CLI fixtures, and ${collectionCases.length} installed collection-command fixtures.\n`);
+  process.stdout.write(`Validated ${basename(archive)} with ESLint ${ESLint.version} and @eslint/markdown ${markdown.meta.version}: ${entries.length} archive entries, ${spellingCases.length} API/ESLint CLI fixtures, and ${collectionCases.length} installed collection-command fixtures.\n`);
 } finally {
   await rm(temporary, { recursive: true, force: true });
 }
